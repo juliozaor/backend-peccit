@@ -10,6 +10,7 @@ export class Modulo {
     private _nombreMostrar: string,
     private _ruta: string,
     private _icono: string,
+    private _orden?: number,
     private _estado: boolean = true,
     private _creacion: DateTime = DateTime.now(),
     private _actualizacion:DateTime = DateTime.now(),
@@ -37,6 +38,10 @@ export class Modulo {
 
   public get icono (){
     return this._icono
+  }
+
+  public get orden (){
+    return this._orden
   }
 
   public get estado (){

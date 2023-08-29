@@ -6,6 +6,7 @@ import Encuestas from './Encuesta';
 import TbClasificacion from './Clasificacion';
 import TblTiposPregunta from './TiposPregunta';
 import Respuestas from './Respuesta';
+import { TblSubTipoDatos } from './SubTipoDato';
 
 export default class Preguntas extends BaseModel {
   public static table = 'preguntas';
@@ -25,6 +26,10 @@ export default class Preguntas extends BaseModel {
   @column({ columnName: 'adjuntable' }) public adjuntable: boolean;
   @column({ columnName: 'adjuntable_obligatorio' }) public adjuntableObligatorio: boolean;
   @column({ columnName: 'obligatoria' }) public obligatoria: boolean
+  @column({ columnName: 'tiene_observacion' }) public tieneObservacion?: boolean
+  @column({ columnName: 'sub_tipo_evidencia_id' }) public subTipoEvidenciaId?: number;
+  @column({ columnName: 'tipo' }) public tipo?: number;
+  @column({ columnName: 'max_observacion' }) public maxObservacion?: number;
   @column({ columnName: 'orden' }) public orden: number;
   @column({ columnName: 'tamanio' }) public tamanio?: number;
 
@@ -44,6 +49,10 @@ export default class Preguntas extends BaseModel {
     this.obligatoria = pregunta.obligatoria
     this.orden = pregunta.orden
     this.tamanio = pregunta.tamanio
+    this.subTipoEvidenciaId = pregunta.subTipoEvidenciaId
+    this.maxObservacion = pregunta.maxObservacion
+    this.tipo = pregunta.tipo
+    this.tieneObservacion = pregunta.tieneObservacion
   }
 
   public establecePreguntaConId(pregunta: Pregunta) {
@@ -61,6 +70,10 @@ export default class Preguntas extends BaseModel {
     this.obligatoria = pregunta.obligatoria
     this.orden = pregunta.orden
     this.tamanio = pregunta.tamanio
+    this.subTipoEvidenciaId = pregunta.subTipoEvidenciaId
+    this.maxObservacion = pregunta.maxObservacion
+    this.tipo = pregunta.tipo
+    this.tieneObservacion = pregunta.tieneObservacion
   }
 
   public obtenerPregunta(): Pregunta {
@@ -80,6 +93,10 @@ export default class Preguntas extends BaseModel {
     pregunta.obligatoria = this.obligatoria 
     pregunta.orden = this.orden 
     pregunta.tamanio = this.tamanio 
+    pregunta.subTipoEvidenciaId = this.subTipoEvidenciaId 
+    pregunta.maxObservacion = this.maxObservacion 
+    pregunta.tipo = this.tipo 
+    pregunta.tieneObservacion = this.tieneObservacion 
     return pregunta
   }
 
@@ -110,6 +127,10 @@ export default class Preguntas extends BaseModel {
   })
   public respuesta: HasMany<typeof Respuestas>
 
-
+  @belongsTo(() => TblSubTipoDatos, {
+    localKey: 'id',
+    foreignKey: 'subTipoEvidenciaId',
+  })
+  public subTiposdatos: BelongsTo<typeof TblSubTipoDatos>
 
 }

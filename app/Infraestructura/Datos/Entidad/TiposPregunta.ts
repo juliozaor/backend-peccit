@@ -14,6 +14,8 @@ export default class TblTiposPregunta extends BaseModel {
 
   @column({ columnName: 'tpp_validaciones' }) public validaciones: JSON
 
+  @column({ columnName: 'tpp_datoclave' }) public datoClave?: JSON
+
   @column({ columnName: 'tpp_estado' }) public estado: boolean
 
 
@@ -22,6 +24,7 @@ export default class TblTiposPregunta extends BaseModel {
     this.nombre = tipoPregunta.nombre
     this.opciones = tipoPregunta.opciones
     this.validaciones = tipoPregunta.validaciones
+    this.datoClave = tipoPregunta.datoClave
     this.estado = tipoPregunta.estado
   }
 
@@ -31,6 +34,7 @@ export default class TblTiposPregunta extends BaseModel {
     tipoPregunta.nombre = this.nombre
     tipoPregunta.opciones = this.opciones
     tipoPregunta.validaciones = this.validaciones
+    tipoPregunta.datoClave = this.datoClave
     tipoPregunta.estado = this.estado
     return tipoPregunta
   }

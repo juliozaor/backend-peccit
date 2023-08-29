@@ -36,6 +36,7 @@
     "./start/Rutas/ruta_indicadores",
     "./start/Rutas/ruta_maestras",
     "./start/Rutas/ruta_soportes",
+    "./start/Rutas/ruta_formulario_peccit",
     "./start/Rutas/ruta_formulario"
   ],
   "providers": [

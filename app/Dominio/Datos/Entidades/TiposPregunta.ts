@@ -4,5 +4,6 @@ export class TiposPregunta {
   nombre: string;
   opciones: JSON;
   validaciones: JSON;
+  datoClave?: JSON;
   estado: boolean;
 }

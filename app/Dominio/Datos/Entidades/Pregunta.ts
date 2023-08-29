@@ -15,4 +15,8 @@ export class Pregunta {
   obligatoria: boolean;
   orden: number;
   tamanio?: number;
+  subTipoEvidenciaId?:number;
+  maxObservacion?: number;
+  tipo?: number;
+  tieneObservacion?: boolean;
 }
