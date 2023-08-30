@@ -18,19 +18,16 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
   async visualizar(params: any): Promise<any> {
     const { idUsuario, idVigilado, idReporte, idMes } = params;
+    const formularios: any = [];
+    const reporte = await TblReporte.findOrFail(idReporte)
 
- 
-     //let tipoAccion = (idUsuario === idVigilado) ? 2 : 1;
-     const formularios: any = [];
-     const reporte = await TblReporte.findOrFail(idReporte)
-     
-     const consulta = TblFormulariosIndicadores.query()
-     const vigencia = reporte.anioVigencia??undefined
-     const usuario = await TblUsuarios.query().preload('objetivos', sqlObj =>{
-      sqlObj.where('obj_vigencia',vigencia!);
-     }).where('identificacion',idVigilado).first(); // objetivos
+    const consulta = TblFormulariosIndicadores.query()
+    const vigencia = reporte.anioVigencia ?? undefined
+    const usuario = await TblUsuarios.query().preload('objetivos', sqlObj => {
+      sqlObj.where('obj_vigencia', vigencia!);
+    }).where('identificacion', idVigilado).first(); // objetivos
 
-  const objetivos = usuario?.objetivos;
+    const objetivos = usuario?.objetivos;
 
     consulta.preload('subIndicadores', subIndicador => {
       if (reporte && reporte.anioVigencia == 2023) {
@@ -47,7 +44,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
           datos.preload('detalleDatos', detalle => {
             detalle.where('ddt_reporte_id', idReporte)
           })
-          
+
         })
 
 
@@ -82,13 +79,13 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     })
 
 
-    const formulariosBD = await consulta.where('id',5)
+    const formulariosBD = await consulta.where('id', 5)
 
-   // return formulariosBD
+    // return formulariosBD
 
-     formulariosBD.forEach(formulario => {
+    formulariosBD.forEach(formulario => {
       const nombre = formulario.nombre
-     // const mensaje = formulario.mensaje
+      // const mensaje = formulario.mensaje
       const subIndicador: any = [];
       const cabeceras: any = [];
       let contador = 0;
@@ -96,41 +93,40 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
         const preguntas: any = []
         contador += 1;
         subInd.datosIndicadores.forEach(datos => {
-          if(contador == 1){
+          if (contador == 1) {
             cabeceras.push(datos.nombre)
           }
           preguntas.push({
             datoId: datos.id,
-           // pregunta: datos.nombre,
+            // pregunta: datos.nombre,
             obligatoria: subInd.obligatorio,
             respuesta: datos.detalleDatos[0]?.valor ?? '',
-          /*   tipoDeEvidencia: "",
-            documento: "",
-            nombreOriginal: "",
-            ruta: "",
-            adjuntable: false,
-            adjuntableObligatorio: false, */
+            /*   tipoDeEvidencia: "",
+              documento: "",
+              nombreOriginal: "",
+              ruta: "",
+              adjuntable: false,
+              adjuntableObligatorio: false, */
             tipoPregunta: "NUMBER",
-           // valoresPregunta: [],
+            // valoresPregunta: [],
             validaciones: {
               tipoDato: subInd.periodo.tipo,
               cantDecimal: subInd.periodo.decimal
             },
-          /*   observacion: "",
-            cumple: "",
-            observacionCumple: "",
-            corresponde: "",
-            observacionCorresponde: "" */
+            /*   observacion: "",
+              cumple: "",
+              observacionCumple: "",
+              corresponde: "",
+              observacionCorresponde: "" */
           })
-        });        
-        if(preguntas.length >= 1){
-        subIndicador.push({
-          nombre: subInd.nombre,
-        //  codigo: subInd.codigo,
-        cabeceras,
-        meses:preguntas,
-        })
-      }
+        });
+        if (preguntas.length >= 1) {
+          subIndicador.push({
+            nombre: subInd.nombre,
+            //  codigo: subInd.codigo,            
+            meses: preguntas,
+          })
+        }
       });
 
       const evidencias: any = [];
@@ -139,14 +135,14 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
           evidencias.push({
             idEvidencia: datoEvidencia.id,
             nombre: evidencia.nombre,
-           // tamanio: evidencia.tamanio,
+            // tamanio: evidencia.tamanio,
             obligatoria: evidencia.obligatorio,
             tipoEvidencia: evidencia.subTipoDato.tipoDato.nombre,
             validacionesEvidencia: {
               tipoDato: evidencia.subTipoDato.nombre,
-              cantDecimal: evidencia.subTipoDato.decimales??0,
+              cantDecimal: evidencia.subTipoDato.decimales ?? 0,
               tamanio: evidencia.tamanio,
-              extension: evidencia.subTipoDato.extension??''
+              extension: evidencia.subTipoDato.extension ?? ''
             },
             respuesta: datoEvidencia.detalleEvidencias[0]?.valor ?? '',
             documento: datoEvidencia.detalleEvidencias[0]?.documento ?? '',
@@ -159,9 +155,10 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       formularios.push({
         nombre,
         evidencias,
-       // mensaje,
-       actividades:subIndicador,
-       objetivos
+        // mensaje,
+        cabeceras,
+        actividades: subIndicador,
+        objetivos
       })
 
     });
@@ -175,162 +172,6 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     }
   }
 
- /* async visualizar(params: any): Promise<any> {
-    const { idUsuario, idVigilado, idReporte, idMes } = params;
-
- 
-     //let tipoAccion = (idUsuario === idVigilado) ? 2 : 1;
-    const formularios: any = [];
-    const reporte = await TblReporte.findOrFail(idReporte)
-
-    const consulta = TblFormulariosIndicadores.query()
-    const vigencia = reporte.anioVigencia??undefined
-
-    consulta.preload('subIndicadores', subIndicador => {
-      if (reporte && reporte.anioVigencia == 2023) {
-        subIndicador.preload('datosIndicadores', datos => {
-          datos.preload('detalleDatos', detalle => {
-            detalle.where('ddt_reporte_id', idReporte)
-          })
-          datos.where('dai_visible', true)
-          datos.where('dai_meses', idMes)
-        }).whereHas('datosIndicadores', datos => {
-          datos.where('dai_meses', idMes)
-        })
-
-
-      } else {
-        subIndicador.preload('datosIndicadores', datos => {
-          datos.preload('detalleDatos', detalle => {
-            detalle.where('ddt_reporte_id', idReporte)
-          })
-          datos.where('dai_meses', idMes)
-        }).whereHas('datosIndicadores', datos => {
-          datos.where('dai_meses', idMes)
-        })
-
-
-      }
-      subIndicador.preload('periodo')
-
-    })
-
-    //Evidencias
-    consulta.preload('evidencias', sqlEvidencia => {
-
-      if (reporte && reporte.anioVigencia == 2023) {
-        sqlEvidencia.preload('datosEvidencias', sqlDatosE => {
-          sqlDatosE.preload('detalleEvidencias', detalleV => {
-            detalleV.where('dde_reporte_id', idReporte)
-          })
-          sqlDatosE.where('dae_visible', true)
-          sqlDatosE.where('dae_meses', idMes)
-
-        }).whereHas('datosEvidencias', sqlDatosE => {
-          sqlDatosE.where('dae_meses', idMes)
-        }).preload('subTipoDato', sqlSubTipoDato => {
-          sqlSubTipoDato.preload('tipoDato')
-        })
-
-      } else {
-        sqlEvidencia.preload('datosEvidencias', sqlDatosE => {
-          sqlDatosE.preload('detalleEvidencias', detalleV => {
-            detalleV.where('dde_reporte_id', idReporte)
-          })
-          sqlDatosE.where('dae_meses', idMes)
-        }).whereHas('datosEvidencias', sqlDatosE => {
-          sqlDatosE.where('dae_meses', idMes)
-        }).preload('subTipoDato', sqlSubTipoDato => {
-          sqlSubTipoDato.preload('tipoDato')
-        })
-      }
-    })
-
-
-    const formulariosBD = await consulta
-
-    return formulariosBD
-
-     formulariosBD.forEach(formulario => {
-      const nombre = formulario.nombre
-      const mensaje = formulario.mensaje
-      const subIndicador: any = [];
-      formulario.subIndicadores.forEach(subInd => {
-        const preguntas: any = []
-        subInd.datosIndicadores.forEach(datos => {
-          preguntas.push({
-            idPregunta: datos.id,
-            pregunta: datos.nombre,
-            obligatoria: subInd.obligatorio,
-            respuesta: datos.detalleDatos[0]?.valor ?? '',
-            tipoDeEvidencia: "",
-            documento: "",
-            nombreOriginal: "",
-            ruta: "",
-            adjuntable: false,
-            adjuntableObligatorio: false,
-            tipoPregunta: "NUMBER",
-            valoresPregunta: [],
-            validaciones: {
-              tipoDato: subInd.periodo.tipo,
-              cantDecimal: subInd.periodo.decimal
-            },
-            observacion: "",
-            cumple: "",
-            observacionCumple: "",
-            corresponde: "",
-            observacionCorresponde: ""
-          })
-        });        
-        if(preguntas.length >= 1){
-        subIndicador.push({
-          nombreSubIndicador: subInd.nombre,
-          codigo: subInd.codigo,
-          preguntas,
-        })
-      }
-      });
-
-      const evidencias: any = [];
-      formulario.evidencias.forEach(evidencia => {
-        evidencia.datosEvidencias.forEach(datoEvidencia => {
-          evidencias.push({
-            idEvidencia: datoEvidencia.id,
-            nombre: evidencia.nombre,
-            tamanio: evidencia.tamanio,
-            obligatoria: evidencia.obligatorio,
-            tipoEvidencia: evidencia.subTipoDato.tipoDato.nombre,
-            validaciones: {
-              tipoDato: evidencia.subTipoDato.nombre,
-              cantDecimal: evidencia.subTipoDato.decimales??0,
-              tamanio: evidencia.tamanio,
-              extension: evidencia.subTipoDato.extension??''
-            },
-            respuesta: datoEvidencia.detalleEvidencias[0]?.valor ?? '',
-            documento: datoEvidencia.detalleEvidencias[0]?.documento ?? '',
-            nombreOriginal: datoEvidencia.detalleEvidencias[0]?.nombredocOriginal ?? '',
-            ruta: datoEvidencia.detalleEvidencias[0]?.ruta ?? ''
-          })
-        });
-      })
-
-      formularios.push({
-        nombre,
-        mensaje,
-        subIndicador,
-        evidencias
-      })
-
-    });
-
-    return {
-      idVigilado,
-      idReporte,
-      idEncuesta: reporte.idEncuesta,
-      vigencia,
-      formularios
-    } 
-  }*/
 
   async enviarSt(params: any): Promise<any> {
     const { idEncuesta, idReporte, idVigilado, idUsuario } = params
@@ -355,7 +196,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       }
       if (formulario.evidencias.length != 0) {
         formulario.evidencias.forEach(evidencia => {
-          if (evidencia.obligatoria){
+          if (evidencia.obligatoria) {
             if ((evidencia.tipoEvidencia === 'FILE' && evidencia.documento === '') || (evidencia.tipoEvidencia !== 'FILE' && evidencia.respuesta === '')) {
               faltantesEvidencias.push(evidencia.idEvidencia);
               aprobado = false;
@@ -492,5 +333,159 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
   }
 
+  async ejecucion(params: any): Promise<any> {
+    const { idUsuario, idVigilado, idReporte, idMes } = params;
+    const formularios: any = [];
+    const reporte = await TblReporte.findOrFail(idReporte)
 
+    const consulta = TblFormulariosIndicadores.query()
+    const vigencia = reporte.anioVigencia ?? undefined
+   
+
+    consulta.preload('subIndicadores', subIndicador => {
+      if (reporte && reporte.anioVigencia == 2023) {
+        subIndicador.preload('datosIndicadores', datos => {
+          datos.preload('detalleDatos', detalle => {
+            detalle.where('ddt_reporte_id', idReporte)
+          })
+          datos.where('dai_visible', true)
+          datos.where('dai_meses', idMes)
+        }).whereHas('datosIndicadores', datos => {
+          datos.where('dai_meses', idMes)
+        })
+
+
+      } else {
+        subIndicador.preload('datosIndicadores', datos => {
+          datos.preload('detalleDatos', detalle => {
+            detalle.where('ddt_reporte_id', idReporte)
+          })
+          datos.where('dai_meses', idMes)
+        }).whereHas('datosIndicadores', datos => {
+          datos.where('dai_meses', idMes)
+        })
+
+
+      }
+      subIndicador.preload('periodo')
+
+    })
+
+    //Evidencias
+    consulta.preload('evidencias', sqlEvidencia => {
+
+      if (reporte && reporte.anioVigencia == 2023) {
+        sqlEvidencia.preload('datosEvidencias', sqlDatosE => {
+          sqlDatosE.preload('detalleEvidencias', detalleV => {
+            detalleV.where('dde_reporte_id', idReporte)
+          })
+          sqlDatosE.where('dae_visible', true)
+          sqlDatosE.where('dae_meses', idMes)
+
+        }).whereHas('datosEvidencias', sqlDatosE => {
+          sqlDatosE.where('dae_meses', idMes)
+        }).preload('subTipoDato', sqlSubTipoDato => {
+          sqlSubTipoDato.preload('tipoDato')
+        })
+
+      } else {
+        sqlEvidencia.preload('datosEvidencias', sqlDatosE => {
+          sqlDatosE.preload('detalleEvidencias', detalleV => {
+            detalleV.where('dde_reporte_id', idReporte)
+          })
+          sqlDatosE.where('dae_meses', idMes)
+        }).whereHas('datosEvidencias', sqlDatosE => {
+          sqlDatosE.where('dae_meses', idMes)
+        }).preload('subTipoDato', sqlSubTipoDato => {
+          sqlSubTipoDato.preload('tipoDato')
+        })
+      }
+    })
+
+
+    const formulariosBD = await consulta.where('id', 5)
+
+    // return formulariosBD
+
+    formulariosBD.forEach(formulario => {
+      const nombre = formulario.nombre
+      // const mensaje = formulario.mensaje
+      const subIndicador: any = [];
+      formulario.subIndicadores.forEach(subInd => {
+        const preguntas: any = []
+        subInd.datosIndicadores.forEach(datos => {
+          
+          preguntas.push({
+            datoId: datos.id,
+            // pregunta: datos.nombre,
+            obligatoria: subInd.obligatorio,
+            respuesta: datos.detalleDatos[0]?.valor ?? '',
+            /*   tipoDeEvidencia: "",
+              documento: "",
+              nombreOriginal: "",
+              ruta: "",
+              adjuntable: false,
+              adjuntableObligatorio: false, */
+            tipoPregunta: "NUMBER",
+            // valoresPregunta: [],
+            validaciones: {
+              tipoDato: subInd.periodo.tipo,
+              cantDecimal: subInd.periodo.decimal
+            },
+            /*   observacion: "",
+              cumple: "",
+              observacionCumple: "",
+              corresponde: "",
+              observacionCorresponde: "" */
+          })
+        });
+        if (preguntas.length >= 1) {
+          subIndicador.push({
+            nombre: subInd.nombre,
+            meses: preguntas,
+          })
+        }
+      });
+
+      const evidencias: any = [];
+      formulario.evidencias.forEach(evidencia => {
+        evidencia.datosEvidencias.forEach(datoEvidencia => {
+          evidencias.push({
+            idEvidencia: datoEvidencia.id,
+            nombre: evidencia.nombre,
+            // tamanio: evidencia.tamanio,
+            obligatoria: evidencia.obligatorio,
+            tipoEvidencia: evidencia.subTipoDato.tipoDato.nombre,
+            validacionesEvidencia: {
+              tipoDato: evidencia.subTipoDato.nombre,
+              cantDecimal: evidencia.subTipoDato.decimales ?? 0,
+              tamanio: evidencia.tamanio,
+              extension: evidencia.subTipoDato.extension ?? ''
+            },
+            respuesta: datoEvidencia.detalleEvidencias[0]?.valor ?? '',
+            documento: datoEvidencia.detalleEvidencias[0]?.documento ?? '',
+            nombreOriginal: datoEvidencia.detalleEvidencias[0]?.nombredocOriginal ?? '',
+            ruta: datoEvidencia.detalleEvidencias[0]?.ruta ?? ''
+          })
+        });
+      })
+
+      formularios.push({
+        nombre,
+        evidencias,
+        // mensaje,
+        actividades: subIndicador
+      })
+
+    });
+
+    return {
+      idVigilado,
+      idReporte,
+      idEncuesta: reporte.idEncuesta,
+      vigencia,
+      mes:idMes,
+      formularios
+    }
+  }
 }

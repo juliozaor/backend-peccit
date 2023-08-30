@@ -5,4 +5,6 @@ export interface RepositorioIndicador {
   visualizar(param: any): Promise<any>
   enviarSt(param: any): Promise<any>
   guardar(datos: string, documento:string): Promise<any>  
+  ejecucion(param: any): Promise<any>
+
 }
