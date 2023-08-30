@@ -410,12 +410,13 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     formulariosBD.forEach(formulario => {
       const nombre = formulario.nombre
       // const mensaje = formulario.mensaje
-      const subIndicador: any = [];
+      const actividades: any = [];
       formulario.subIndicadores.forEach(subInd => {
-        const preguntas: any = []
+       // const preguntas: any = []
         subInd.datosIndicadores.forEach(datos => {
           
-          preguntas.push({
+          actividades.push({
+            nombre: subInd.nombre,
             datoId: datos.id,
             // pregunta: datos.nombre,
             obligatoria: subInd.obligatorio,
@@ -438,13 +439,15 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
               corresponde: "",
               observacionCorresponde: "" */
           })
+
+          
         });
-        if (preguntas.length >= 1) {
-          subIndicador.push({
+      /*   if (preguntas.length >= 1) {
+          actividades.push({
             nombre: subInd.nombre,
             meses: preguntas,
           })
-        }
+        } */
       });
 
       const evidencias: any = [];
@@ -474,7 +477,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
         nombre,
         evidencias,
         // mensaje,
-        actividades: subIndicador
+        actividades
       })
 
     });

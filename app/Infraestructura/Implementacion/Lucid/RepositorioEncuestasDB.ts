@@ -253,7 +253,6 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
     estado = reporte?.estadoVigilado?.nombre ?? estado;
     let clasificacion = '';
 
-
     const consulta = TblEncuestas.query().preload('pregunta', sql => {
       sql.preload('clasificacion')
       sql.whereHas('clasificacion', sqlClass =>{
@@ -276,7 +275,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
     const usuario = await TblUsuarios.query().preload('clasificacionUsuario', (sqlClasC) => {
       sqlClasC.preload('clasificacion')
       sqlClasC.has('clasificacion')
-    }).where('identificacion', idVigilado).first()
+    }).preload('sedesOperativas').where('identificacion', idVigilado).first()
 
     const nombreClasificaion = usuario?.clasificacionUsuario[0]?.nombre;
     const descripcionClasificacion = usuario?.clasificacionUsuario[0]?.descripcion;
@@ -337,6 +336,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
         clasificacionesArr.push(
           {
             clasificacion,
+            sedes:usuario?.sedesOperativas,
             preguntas: preguntasArr
           }
 
