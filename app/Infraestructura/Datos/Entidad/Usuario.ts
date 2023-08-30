@@ -5,6 +5,7 @@ import TblRoles from './Autorizacion/Rol';
 import TblClasificaciones from './Clasificaciones';
 import TblEncuestas from 'App/Infraestructura/Datos/Entidad/Encuesta';
 import TblEstadoVigilado from './EstadoVigilado';
+import { TblObjetivos } from './Objetivos';
 
 export default class TblUsuarios extends BaseModel {
   @column({ isPrimary: true, columnName: 'usn_id' })
@@ -131,5 +132,11 @@ export default class TblUsuarios extends BaseModel {
     pivotTable: 'tbl_usuarios_encuestas'
   })
   public usuarioEstadoVigilado: ManyToMany<typeof TblEstadoVigilado>
+
+   @hasMany(()=> TblObjetivos, {
+    localKey: 'identificacion',
+    foreignKey:'usuarioId'
+  })
+  public objetivos: HasMany<typeof TblObjetivos> 
 
 }
