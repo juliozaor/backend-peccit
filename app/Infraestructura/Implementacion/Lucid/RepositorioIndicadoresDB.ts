@@ -250,7 +250,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
    
     for await (const respuesta of respuestas) {
      
-      const existeDatos = await TblDetalleDatos.query().where({ 'ddt_dato_indicador_id': respuesta.datoId, 'ddt_reporte_id': reporteId }).first()
+      const existeDatos = await TblDetalleDatos.query().where({ 'ddt_dato_indicador_id': respuesta.preguntaId, 'ddt_reporte_id': reporteId }).first()
       
 
       let data: DetalleDatos = {
