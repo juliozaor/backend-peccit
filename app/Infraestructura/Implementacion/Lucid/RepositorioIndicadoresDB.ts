@@ -11,6 +11,8 @@ import { TblDetalleDatosEvidencias } from 'App/Infraestructura/Datos/Entidad/Det
 import { DetalleEvidencia } from 'App/Dominio/Datos/Entidades/DetalleEvidencias';
 import { TblArchivosTemporales } from 'App/Infraestructura/Datos/Entidad/Archivo';
 import { ServicioEstados } from 'App/Dominio/Datos/Servicios/ServicioEstados';
+import { TblObjetivos } from 'App/Infraestructura/Datos/Entidad/Objetivos';
+import { Objetivo } from 'App/Dominio/Datos/Entidades/objetivo';
 
 export class RepositorioIndicadoresDB implements RepositorioIndicador {
   private servicioAuditoria = new ServicioAuditoria();
@@ -225,33 +227,38 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
 
   async guardar(datos: string, documento: string): Promise<any> {
-    const { respuestas, reporteId, evidencias, mesId } = JSON.parse(datos);
+    const { respuestas, reporteId, evidencias, objetivos } = JSON.parse(datos);
 
-    //const { usuarioCreacion, loginVigilado, idEncuesta } = await TblReporte.findByOrFail('id', idReporte)
+    const { anioVigencia} = await TblReporte.findByOrFail('id', reporteId)
 
-    this.servicioEstado.Log(documento, 1003, undefined, reporteId)
-    /* this.servicioAuditoria.Auditar({
-      accion: "Guardar Respuesta",
-      modulo: "Encuesta",
-      usuario: usuarioCreacion ?? '',
-      vigilado: loginVigilado ?? '',
-      descripcion: 'Primer guardado de la encuesta',
-      encuestaId: idEncuesta,
-      tipoLog: 4
-    }) */
+   // this.servicioEstado.Log(documento, 1003, undefined, reporteId)
+
+    if(objetivos.length >= 1){
+      await TblObjetivos.query().where('obj_usuario_id', documento).delete();
+   }
+    for await (const objetivo of objetivos) {
+      const objetivoDB= {
+      nombre : objetivo,
+      usuarioId : documento,
+      vigencia : anioVigencia??2023
+    }
+      const obj = new TblObjetivos();
+       obj.estableceObjetivoConId(objetivoDB);
+       obj.save();
+    }
+
+   
     for await (const respuesta of respuestas) {
-      //Evaluar si el archivo en la tabla temporal y borrarlo
-      //validar si existe
-      //   const existeRespuesta = await TblRespuestas.query().where({ 'id_pregunta': respuesta.preguntaId, 'id_reporte': idReporte }).first()
-
-      const existeDatos = await TblDetalleDatos.query().where({ 'ddt_dato_indicador_id': respuesta.preguntaId, 'ddt_reporte_id': reporteId }).first()
+     
+      const existeDatos = await TblDetalleDatos.query().where({ 'ddt_dato_indicador_id': respuesta.datoId, 'ddt_reporte_id': reporteId }).first()
+      
 
       let data: DetalleDatos = {
         datoIndicadorId: respuesta.preguntaId,
         valor: respuesta.valor,
         reporteId: reporteId,
         fechaActualizacion: DateTime.fromJSDate(new Date),
-        anioActivoId: 2023
+        anioActivoId: anioVigencia??2023
       }
 
       if (respuesta.documento) {
@@ -281,10 +288,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     }
 
     for await (const evidencia of evidencias) {
-      //Evaluar si el archivo en la tabla temporal y borrarlo
-      //validar si existe
-      //   const existeRespuesta = await TblRespuestas.query().where({ 'id_pregunta': respuesta.preguntaId, 'id_reporte': idReporte }).first()
-
+    
       const existeDatosE = await TblDetalleDatosEvidencias.query().where({ 'dde_dato_evidencia_id': evidencia.evidenciaId, 'dde_reporte_id': reporteId }).first()
 
       let data: DetalleEvidencia = {
@@ -292,7 +296,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
         valor: evidencia.valor,
         reporteId: reporteId,
         fechaActualizacion: DateTime.fromJSDate(new Date),
-        anioActivoId: 2023
+        anioActivoId: anioVigencia??2023
       }
 
       if (evidencia.documento) {
@@ -368,6 +372,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
       }
       subIndicador.preload('periodo')
+      subIndicador.preload('subTipoDato')
 
     })
 
@@ -420,16 +425,22 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
             datoId: datos.id,
             // pregunta: datos.nombre,
             obligatoria: subInd.obligatorio,
-            respuesta: datos.detalleDatos[0]?.valor ?? '',
-            /*   tipoDeEvidencia: "",
+            planeado: datos.detalleDatos[0]?.valor ?? '',
+            respuesta: datos.detalleDatos[0]?.valorEjecutado ?? '',
+              tipoDeEvidencia: 'FILE',
+              validacionesEvidencia: {
+                tipoDato: subInd.subTipoDato.nombre,
+                cantDecimal: subInd.subTipoDato.decimales??0,
+                tamanio: subInd.tamanio,
+                extension: subInd.subTipoDato.extension??''
+              },
               documento: "",
               nombreOriginal: "",
               ruta: "",
               adjuntable: false,
-              adjuntableObligatorio: false, */
+              adjuntableObligatorio: false,
             tipoPregunta: "NUMBER",
-            // valoresPregunta: [],
-            validaciones: {
+            validacionesPregunta: {
               tipoDato: subInd.periodo.tipo,
               cantDecimal: subInd.periodo.decimal
             },
@@ -475,9 +486,9 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
       formularios.push({
         nombre,
-        evidencias,
         // mensaje,
-        actividades
+        adicionales:evidencias,
+        actividades,
       })
 
     });

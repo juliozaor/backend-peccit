@@ -4,6 +4,7 @@ export class DetalleDatos {
   datoIndicadorId: number; 
   estado?: boolean; 
   valor: number; 
+  valorEjecutado?: number;
   anioActivoId: number; 
   reporteId: number; 
   fechaActualizacion: DateTime;
