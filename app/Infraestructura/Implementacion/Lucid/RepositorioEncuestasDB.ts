@@ -230,8 +230,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
       if (preguntasArr.length >= 1) {
         clasificacionesArr.push(
           {
-            clasificacion,
-            sedes:usuario?.sedesOperativas,
+            clasificacion,            
             preguntas: preguntasArr
           }
 
@@ -249,6 +248,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
       clasificaion: nombreClasificaion,
       descripcionClasificacion,
      // observacion: encuestaSql?.observacion,
+     sedes:usuario?.sedesOperativas,
       clasificaciones: clasificacionesArr,
      
     }
