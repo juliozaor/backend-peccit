@@ -1,7 +1,6 @@
 import { RepositorioIndicador } from 'App/Dominio/Repositorios/RepositorioIndicador';
 import TblReporte from 'App/Infraestructura/Datos/Entidad/Reporte';
 import TblUsuarios from 'App/Infraestructura/Datos/Entidad/Usuario';
-import TblRespuestas from 'App/Infraestructura/Datos/Entidad/Respuesta';
 import { ServicioAuditoria } from 'App/Dominio/Datos/Servicios/ServicioAuditoria';
 import { DateTime } from 'luxon';
 import { TblFormulariosIndicadores } from 'App/Infraestructura/Datos/Entidad/FormularioIndicadores';
@@ -377,34 +376,35 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     })
 
     //Evidencias
-    consulta.preload('evidencias', sqlEvidencia => {
+    consulta.preload('adicionales', sqlAdicional => {
 
       if (reporte && reporte.anioVigencia == 2023) {
-        sqlEvidencia.preload('datosEvidencias', sqlDatosE => {
-          sqlDatosE.preload('detalleEvidencias', detalleV => {
-            detalleV.where('dde_reporte_id', idReporte)
+        sqlAdicional.preload('datosAdicionales', sqlDatosE => {
+          sqlDatosE.preload('detalleAdicional', detalleV => {
+            detalleV.where('dda_reporte_id', idReporte)
           })
-          sqlDatosE.where('dae_visible', true)
-          sqlDatosE.where('dae_meses', idMes)
+          sqlDatosE.where('dad_visible', true)
+          sqlDatosE.where('dad_meses', idMes)
 
-        }).whereHas('datosEvidencias', sqlDatosE => {
-          sqlDatosE.where('dae_meses', idMes)
+        }).whereHas('datosAdicionales', sqlDatosE => {
+          sqlDatosE.where('dad_meses', idMes)
         }).preload('subTipoDato', sqlSubTipoDato => {
           sqlSubTipoDato.preload('tipoDato')
         })
 
       } else {
-        sqlEvidencia.preload('datosEvidencias', sqlDatosE => {
-          sqlDatosE.preload('detalleEvidencias', detalleV => {
-            detalleV.where('dde_reporte_id', idReporte)
+        sqlAdicional.preload('datosAdicionales', sqlDatosE => {
+          sqlDatosE.preload('detalleAdicional', detalleV => {
+            detalleV.where('dda_reporte_id', idReporte)
           })
-          sqlDatosE.where('dae_meses', idMes)
-        }).whereHas('datosEvidencias', sqlDatosE => {
-          sqlDatosE.where('dae_meses', idMes)
+          sqlDatosE.where('dad_meses', idMes)
+        }).whereHas('datosAdicionales', sqlDatosE => {
+          sqlDatosE.where('dad_meses', idMes)
         }).preload('subTipoDato', sqlSubTipoDato => {
           sqlSubTipoDato.preload('tipoDato')
         })
       }
+      sqlAdicional.preload('tipoPregunta');
     })
 
 
@@ -413,7 +413,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     // return formulariosBD
 
     formulariosBD.forEach(formulario => {
-      const nombre = formulario.nombre
+     // const nombre = formulario.nombre
       // const mensaje = formulario.mensaje
       const actividades: any = [];
       formulario.subIndicadores.forEach(subInd => {
@@ -462,30 +462,40 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       });
 
       const evidencias: any = [];
-      formulario.evidencias.forEach(evidencia => {
-        evidencia.datosEvidencias.forEach(datoEvidencia => {
+      formulario.adicionales.forEach(adicional => {
+        adicional.datosAdicionales.forEach(datoAdicional => {
           evidencias.push({
-            idEvidencia: datoEvidencia.id,
-            nombre: evidencia.nombre,
-            // tamanio: evidencia.tamanio,
-            obligatoria: evidencia.obligatorio,
-            tipoEvidencia: evidencia.subTipoDato.tipoDato.nombre,
+            idAdicional: datoAdicional.id,
+            pregunta: adicional.nombre,
+            obligatoria: adicional.obligatorio,
+            respuesta: datoAdicional.detalleAdicional[0]?.valor ?? '',
+            documento: datoAdicional.detalleAdicional[0]?.documento ?? '',
+            nombreOriginal: datoAdicional.detalleAdicional[0]?.nombredocOriginal ?? '',
+            ruta: datoAdicional.detalleAdicional[0]?.ruta ?? '',
+            adjuntable: adicional.adjuntable,
+            adjuntableObligatorio: adicional.adjuntableObligatorio,
+            tipoPregunta: adicional.tipoPregunta.nombre,
+            valoresPregunta: adicional.tipoPregunta.opciones,
+            validacionesPregunta: adicional.tipoPregunta.validaciones,
+            tieneObservacion:adicional.tieneObservacion,
+            maxObservacion: adicional.maxObservacion,
+            observacion: datoAdicional.detalleAdicional[0]?.observacion ?? '',
+            habilitaObservacion: adicional.tipoPregunta.datoClave,
+            tipoEvidencia: adicional.subTipoDato.tipoDato.nombre,
             validacionesEvidencia: {
-              tipoDato: evidencia.subTipoDato.nombre,
-              cantDecimal: evidencia.subTipoDato.decimales ?? 0,
-              tamanio: evidencia.tamanio,
-              extension: evidencia.subTipoDato.extension ?? ''
+              tipoDato: adicional.subTipoDato.nombre,
+              cantDecimal: adicional.subTipoDato.decimales ?? 0,
+              tamanio: adicional.tamanio,
+              extension: adicional.subTipoDato.extension ?? ''
             },
-            respuesta: datoEvidencia.detalleEvidencias[0]?.valor ?? '',
-            documento: datoEvidencia.detalleEvidencias[0]?.documento ?? '',
-            nombreOriginal: datoEvidencia.detalleEvidencias[0]?.nombredocOriginal ?? '',
-            ruta: datoEvidencia.detalleEvidencias[0]?.ruta ?? ''
+            tipo:adicional.tipo,
+            
           })
         });
       })
 
       formularios.push({
-        nombre,
+        nombre:"Ejecución",
         // mensaje,
         adicionales:evidencias,
         actividades,
