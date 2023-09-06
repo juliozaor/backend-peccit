@@ -20,6 +20,7 @@ import { EnviadorEmail } from 'App/Dominio/Email/EnviadorEmail'
 import { EmailnotificacionCorreo } from 'App/Dominio/Email/Emails/EmailNotificacionCorreo';
 import Env from '@ioc:Adonis/Core/Env';
 import { EnviadorEmailAdonis } from 'App/Infraestructura/Email/EnviadorEmailAdonis';
+import Preguntas from 'App/Infraestructura/Datos/Entidad/Pregunta';
 export class RepositorioEncuestasDB implements RepositorioEncuesta {
   private servicioAuditoria = new ServicioAuditoria();
   private servicioEstado = new ServicioEstados();
@@ -257,29 +258,25 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
   }
 
   async enviarSt(params: any): Promise<any> {
-    const { idEncuesta, idReporte, idVigilado, idUsuario, confirmar =false } = params
-    const usuario = await TblUsuarios.query().preload('clasificacionUsuario', (sqlClasC) => {
-      sqlClasC.preload('clasificacion', (sqlCla) => {
-        sqlCla.preload('pregunta', (sqlPre) => {
-          sqlPre.where('id_encuesta', idEncuesta)
-        }).whereHas('pregunta', sqlE => {
-          sqlE.where('id_encuesta', idEncuesta);
-        })
-      })
-    }).where('identificacion', idUsuario).first()
+    const {  idReporte, idVigilado, idUsuario, confirmar =false } = params
+    const usuario = await TblUsuarios.query().where('identificacion', idUsuario).first()
 
     let aprobado = true;
     const faltantes = new Array();
-    const pasos = usuario?.clasificacionUsuario[0]?.clasificacion
+  //  const pasos = usuario?.clasificacionUsuario[0]?.clasificacion
     const respuestas = await TblRespuestas.query().where('id_reporte', idReporte).orderBy('id_pregunta', 'asc')
-    pasos?.forEach(paso => {
-      paso.pregunta.forEach(preguntaPaso => {
+  
+    const preguntas = await Preguntas.query().preload('tiposPregunta').where('estado',1);
+   // pasos?.forEach(paso => {
+     preguntas.forEach(preguntaPaso => {
         let repuestaExiste = true
         let archivoExiste = true
         const respuesta = respuestas.find(r => r.idPregunta === preguntaPaso.id)
         if (preguntaPaso.obligatoria) {
           if (!respuesta) {
             //throw new NoAprobado('Faltan preguntas por responder')     
+           
+            
             repuestaExiste = false
           }
 
@@ -287,33 +284,51 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
             repuestaExiste = false
           }
 
-          if (respuesta && respuesta.valor === 'N' && (!respuesta.observacion || respuesta.observacion === '')) {
+         /*  if (respuesta && respuesta.valor === 'N' && (!respuesta.observacion || respuesta.observacion === '')) {
             repuestaExiste = false
+          } */
+
+          if (respuesta && respuesta.valor !== '' && (preguntaPaso.tieneObservacion)) {           
+           const datoClave = preguntaPaso.tiposPregunta.datoClave!;
+           const arr = Object.values(datoClave);
+           if(arr.length !== 0){            
+            arr.forEach(dato => {
+              
+             if(respuesta.valor === dato && (!respuesta.observacion || respuesta.observacion === '')){
+              repuestaExiste = false
+             }
+              
+            });
+           }
+           
+           
+            
+           
           }
 
 
-          if (respuesta && respuesta.valor === 'S' && preguntaPaso.adjuntableObligatorio) {
+        /*   if (respuesta && respuesta.valor === 'S' && preguntaPaso.adjuntableObligatorio) {
             console.log(respuesta.observacion);
 
             archivoExiste = this.validarDocumento(respuesta, preguntaPaso);
-          }
+          } */
 
         }
 
 
-        if (!repuestaExiste || !archivoExiste) {
+        if (!repuestaExiste ) {
           aprobado = false
           faltantes.push({
             preguntaId: preguntaPaso.id,
-            archivoObligatorio: preguntaPaso.adjuntableObligatorio
+           // archivoObligatorio: preguntaPaso.adjuntableObligatorio
           })
 
         }
 
 
-      });
+  });
 
-    });
+   // });
 
     if(confirmar) aprobado= true;
 

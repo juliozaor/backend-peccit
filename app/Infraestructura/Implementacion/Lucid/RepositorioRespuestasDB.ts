@@ -33,9 +33,11 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
       tipoLog: 4
     })
 
-    if(sedes.length >= 1){
+    /* if(sedes.length >= 1){
       await TblSedesOperativas.query().where('seo_usuario_id', documento).delete();
-   }
+   } */
+   await TblSedesOperativas.query().where('seo_usuario_id', documento).delete();
+
     for await (const sede of sedes) {
       sede.usuarioId = documento;
       const sedesOperativas = new TblSedesOperativas();
