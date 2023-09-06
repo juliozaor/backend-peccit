@@ -14,6 +14,7 @@ import { TblObjetivos } from 'App/Infraestructura/Datos/Entidad/Objetivos';
 import { Objetivo } from 'App/Dominio/Datos/Entidades/objetivo';
 import { TblDetallesAdicionales } from 'App/Infraestructura/Datos/Entidad/DetalleAdicionales';
 import { DetalleAdicional } from 'App/Dominio/Datos/Entidades/DetalleAdicional';
+import { TblAnioVigencias } from 'App/Infraestructura/Datos/Entidad/AnioVigencia';
 
 export class RepositorioIndicadoresDB implements RepositorioIndicador {
   private servicioAuditoria = new ServicioAuditoria();
@@ -177,20 +178,22 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
 
   async enviarSt(params: any): Promise<any> {
-    const { idEncuesta, idReporte, idVigilado, idUsuario } = params
+    const { idReporte, idVigilado, idUsuario } = params
     let aprobado = true;
-    const faltantesIndicadores = new Array();
+    const faltantesActividades = new Array();
     const faltantesEvidencias = new Array();
+
+    const reportes = await TblReporte.find(idReporte)
 
     const indicadores = await this.visualizar(params)
 
     indicadores.formularios.forEach(formulario => {
-      if (formulario.subIndicador.length != 0) {
-        formulario.subIndicador.forEach(subInd => {
-          if (subInd.preguntas.length != 0) {
-            subInd.preguntas.forEach(pregunta => {
-              if (pregunta.obligatoria && pregunta.respuesta === '') {
-                faltantesIndicadores.push(pregunta.idPregunta);
+      if (formulario.actividades.length != 0) {
+        formulario.actividades.forEach(actividad => {
+          if (actividad.meses.length != 0) {
+            actividad.meses.forEach(mes => {
+              if (mes.obligatoria && mes.respuesta === '') {
+                faltantesActividades.push(mes.datoId);
                 aprobado = false;
               }
             });
@@ -213,7 +216,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     });
 
     if (aprobado) {
-      this.servicioEstado.Log(idUsuario, 1004, idEncuesta)
+      this.servicioEstado.Log(idUsuario, 1004, reportes?.idEncuesta)
       const reporte = await TblReporte.findOrFail(idReporte)
       reporte.fechaEnviost = DateTime.fromJSDate(new Date())
       reporte.envioSt = '1'
@@ -222,7 +225,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     }
 
     //return indicadores
-    return { aprobado, faltantesIndicadores, faltantesEvidencias }
+    return { aprobado, faltantesActividades, faltantesEvidencias }
 
   }
 
@@ -230,36 +233,36 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
   async guardar(datos: string, documento: string): Promise<any> {
     const { respuestas, reporteId, evidencias, objetivos } = JSON.parse(datos);
 
-    const { anioVigencia} = await TblReporte.findByOrFail('id', reporteId)
+    const { anioVigencia } = await TblReporte.findByOrFail('id', reporteId)
 
-   // this.servicioEstado.Log(documento, 1003, undefined, reporteId)
+    // this.servicioEstado.Log(documento, 1003, undefined, reporteId)
 
-    if(objetivos.length >= 1){
+    if (objetivos.length >= 1) {
       await TblObjetivos.query().where('obj_usuario_id', documento).delete();
-   }
-    for await (const objetivo of objetivos) {
-      const objetivoDB= {
-      nombre : objetivo,
-      usuarioId : documento,
-      vigencia : anioVigencia??2023
     }
+    for await (const objetivo of objetivos) {
+      const objetivoDB = {
+        nombre: objetivo,
+        usuarioId: documento,
+        vigencia: anioVigencia ?? 2023
+      }
       const obj = new TblObjetivos();
-       obj.estableceObjetivoConId(objetivoDB);
-       obj.save();
+      obj.estableceObjetivoConId(objetivoDB);
+      obj.save();
     }
 
-   
+
     for await (const respuesta of respuestas) {
-     
+
       const existeDatos = await TblDetalleDatos.query().where({ 'ddt_dato_indicador_id': respuesta.preguntaId, 'ddt_reporte_id': reporteId }).first()
-      
+
 
       let data: DetalleDatos = {
         datoIndicadorId: respuesta.preguntaId,
         valor: respuesta.valor,
         reporteId: reporteId,
         fechaActualizacion: DateTime.fromJSDate(new Date),
-        anioActivoId: anioVigencia??2023
+        anioActivoId: anioVigencia ?? 2023
       }
 
       if (respuesta.documento) {
@@ -289,7 +292,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     }
 
     for await (const evidencia of evidencias) {
-    
+
       const existeDatosE = await TblDetalleDatosEvidencias.query().where({ 'dde_dato_evidencia_id': evidencia.evidenciaId, 'dde_reporte_id': reporteId }).first()
 
       let data: DetalleEvidencia = {
@@ -297,7 +300,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
         valor: evidencia.valor,
         reporteId: reporteId,
         fechaActualizacion: DateTime.fromJSDate(new Date),
-        anioActivoId: anioVigencia??2023
+        anioActivoId: anioVigencia ?? 2023
       }
 
       if (evidencia.documento) {
@@ -341,17 +344,26 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
   async ejecucion(params: any): Promise<any> {
     const { idUsuario, idVigilado, idReporte, idMes } = params;
     const formularios: any = [];
-    const reporte = await TblReporte.findOrFail(idReporte)
-
+    //const reporte = await TblReporte.findOrFail(idReporte)
+    const anioVigencia = await TblAnioVigencias.query().where('anv_estado', true).orderBy('anv_id', 'desc').select('anv_anio').first()
+    const reporte = await TblReporte.query().where({ 'id_encuesta': 2, 'login_vigilado': idVigilado,'anio_vigencia':anioVigencia?.anio! }).first();
+    if (!reporte) {
+      return {
+        estado: false,
+        codigo: 400,
+        mensaje: "No se encontro una planeación para este usuario",
+      }
+    }
+    const reporteId = reporte?.id!;
     const consulta = TblFormulariosIndicadores.query()
-    const vigencia = reporte.anioVigencia ?? undefined
-   
+    const vigencia = reporte?.anioVigencia ?? undefined
+
 
     consulta.preload('subIndicadores', subIndicador => {
       if (reporte && reporte.anioVigencia == 2023) {
         subIndicador.preload('datosIndicadores', datos => {
           datos.preload('detalleDatos', detalle => {
-            detalle.where('ddt_reporte_id', idReporte)
+            detalle.where('ddt_reporte_id', reporteId)
           })
           datos.where('dai_visible', true)
           datos.where('dai_meses', idMes)
@@ -363,7 +375,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       } else {
         subIndicador.preload('datosIndicadores', datos => {
           datos.preload('detalleDatos', detalle => {
-            detalle.where('ddt_reporte_id', idReporte)
+            detalle.where('ddt_reporte_id', reporteId)
           })
           datos.where('dai_meses', idMes)
         }).whereHas('datosIndicadores', datos => {
@@ -383,7 +395,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       if (reporte && reporte.anioVigencia == 2023) {
         sqlAdicional.preload('datosAdicionales', sqlDatosE => {
           sqlDatosE.preload('detalleAdicional', detalleV => {
-            detalleV.where('dda_reporte_id', idReporte)
+            detalleV.where('dda_reporte_id', reporteId)
           })
           sqlDatosE.where('dad_visible', true)
           sqlDatosE.where('dad_meses', idMes)
@@ -397,7 +409,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       } else {
         sqlAdicional.preload('datosAdicionales', sqlDatosE => {
           sqlDatosE.preload('detalleAdicional', detalleV => {
-            detalleV.where('dda_reporte_id', idReporte)
+            detalleV.where('dda_reporte_id', reporteId)
           })
           sqlDatosE.where('dad_meses', idMes)
         }).whereHas('datosAdicionales', sqlDatosE => {
@@ -415,13 +427,13 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     // return formulariosBD
 
     formulariosBD.forEach(formulario => {
-     // const nombre = formulario.nombre
+      // const nombre = formulario.nombre
       // const mensaje = formulario.mensaje
       const actividades: any = [];
       formulario.subIndicadores.forEach(subInd => {
-       // const preguntas: any = []
+        // const preguntas: any = []
         subInd.datosIndicadores.forEach(datos => {
-          
+
           actividades.push({
             nombre: subInd.nombre,
             datoId: datos.id,
@@ -429,18 +441,18 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
             obligatoria: subInd.obligatorio,
             planeado: datos.detalleDatos[0]?.valor ?? '',
             respuesta: datos.detalleDatos[0]?.valorEjecutado ?? '',
-              tipoDeEvidencia: 'FILE',
-              validacionesEvidencia: {
-                tipoDato: subInd.subTipoDato.nombre,
-                cantDecimal: subInd.subTipoDato.decimales??0,
-                tamanio: subInd.tamanio,
-                extension: subInd.subTipoDato.extension??''
-              },
-              documento: "",
-              nombreOriginal: "",
-              ruta: "",
-              adjuntable: false,
-              adjuntableObligatorio: false,
+            tipoDeEvidencia: 'FILE',
+            validacionesEvidencia: {
+              tipoDato: subInd.subTipoDato.nombre,
+              cantDecimal: subInd.subTipoDato.decimales ?? 0,
+              tamanio: subInd.tamanio,
+              extension: subInd.subTipoDato.extension ?? ''
+            },
+            documento: "",
+            nombreOriginal: "",
+            ruta: "",
+            adjuntable: false,
+            adjuntableObligatorio: false,
             tipoPregunta: "NUMBER",
             validacionesPregunta: {
               tipoDato: subInd.periodo.tipo,
@@ -453,14 +465,14 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
               observacionCorresponde: "" */
           })
 
-          
+
         });
-      /*   if (preguntas.length >= 1) {
-          actividades.push({
-            nombre: subInd.nombre,
-            meses: preguntas,
-          })
-        } */
+        /*   if (preguntas.length >= 1) {
+            actividades.push({
+              nombre: subInd.nombre,
+              meses: preguntas,
+            })
+          } */
       });
 
       const evidencias: any = [];
@@ -479,7 +491,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
             tipoPregunta: adicional.tipoPregunta.nombre,
             valoresPregunta: adicional.tipoPregunta.opciones,
             validacionesPregunta: adicional.tipoPregunta.validaciones,
-            tieneObservacion:adicional.tieneObservacion,
+            tieneObservacion: adicional.tieneObservacion,
             maxObservacion: adicional.maxObservacion,
             observacion: datoAdicional.detalleAdicional[0]?.observacion ?? '',
             habilitaObservacion: adicional.tipoPregunta.datoClave,
@@ -490,16 +502,16 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
               tamanio: adicional.tamanio,
               extension: adicional.subTipoDato.extension ?? ''
             },
-            tipo:adicional.tipo,
-            
+            tipo: adicional.tipo,
+
           })
         });
       })
 
       formularios.push({
-        nombre:"Ejecución",
+        nombre: "Ejecución",
         // mensaje,
-        adicionales:evidencias,
+        adicionales: evidencias,
         actividades,
       })
 
@@ -508,9 +520,9 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     return {
       idVigilado,
       idReporte,
-      idEncuesta: reporte.idEncuesta,
+      idEncuesta: 3,
       vigencia,
-      mes:idMes,
+      mes: idMes,
       formularios
     }
   }
@@ -518,20 +530,20 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
   async guardarEjecucion(datos: string, documento: string): Promise<any> {
     const { respuestasActividades, reporteId, adicionales } = JSON.parse(datos);
 
-    const { anioVigencia} = await TblReporte.findByOrFail('id', reporteId)
+    const { anioVigencia } = await TblReporte.findByOrFail('id', reporteId)
 
-   
-   
+
+
     for await (const respuesta of respuestasActividades) {
-     
+
       const existeDatos = await TblDetalleDatos.query().where({ 'ddt_dato_indicador_id': respuesta.preguntaId, 'ddt_reporte_id': reporteId }).first()
-      
+
       let data: DetalleDatos = {
         datoIndicadorId: respuesta.preguntaId,
         valorEjecutado: respuesta.valor,
         reporteId: reporteId,
         fechaActualizacion: DateTime.fromJSDate(new Date),
-        anioActivoId: anioVigencia??2023
+        anioActivoId: anioVigencia ?? 2023
       }
 
       if (respuesta.documento) {
@@ -543,9 +555,9 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       if (respuesta.ruta) {
         data.ruta = respuesta.ruta
       }
-     /*  if (respuesta.observacion) {
-        data.observacion = respuesta.observacion
-      } */
+      /*  if (respuesta.observacion) {
+         data.observacion = respuesta.observacion
+       } */
 
       if (existeDatos) {
         existeDatos.estableceDetalleDatosConId(data)
@@ -561,7 +573,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     }
 
     for await (const adicional of adicionales) {
-    
+
       const existeDatosE = await TblDetallesAdicionales.query().where({ 'dda_dato_adicional_id': adicional.adicionalId, 'dda_reporte_id': reporteId }).first()
 
       let data: DetalleAdicional = {
@@ -569,7 +581,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
         reporteId: reporteId,
         valor: adicional.valor,
         fechaActualizacion: DateTime.fromJSDate(new Date),
-        anioActivoId: anioVigencia??2023
+        anioActivoId: anioVigencia ?? 2023
       }
 
       if (adicional.documento) {
@@ -581,7 +593,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       if (adicional.ruta) {
         data.ruta = adicional.ruta
       }
-       if (adicional.observacion) {
+      if (adicional.observacion) {
         data.observacion = adicional.observacion
       }
 
