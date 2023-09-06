@@ -27,4 +27,9 @@ export class ServicioIndicadores {
     return this.repositorio.ejecucion(params);
   }
 
+  async guardarEjecucion(datos: string, payload:PayloadJWT): Promise<any> {
+    const {documento} = payload;
+    return this.repositorio.guardarEjecucion(datos, documento);
+  }
+
 }

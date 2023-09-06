@@ -12,6 +12,8 @@ import { TblArchivosTemporales } from 'App/Infraestructura/Datos/Entidad/Archivo
 import { ServicioEstados } from 'App/Dominio/Datos/Servicios/ServicioEstados';
 import { TblObjetivos } from 'App/Infraestructura/Datos/Entidad/Objetivos';
 import { Objetivo } from 'App/Dominio/Datos/Entidades/objetivo';
+import { TblDetallesAdicionales } from 'App/Infraestructura/Datos/Entidad/DetalleAdicionales';
+import { DetalleAdicional } from 'App/Dominio/Datos/Entidades/DetalleAdicional';
 
 export class RepositorioIndicadoresDB implements RepositorioIndicador {
   private servicioAuditoria = new ServicioAuditoria();
@@ -511,5 +513,104 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       mes:idMes,
       formularios
     }
+  }
+
+  async guardarEjecucion(datos: string, documento: string): Promise<any> {
+    const { respuestasActividades, reporteId, adicionales } = JSON.parse(datos);
+
+    const { anioVigencia} = await TblReporte.findByOrFail('id', reporteId)
+
+   
+   
+    for await (const respuesta of respuestasActividades) {
+     
+      const existeDatos = await TblDetalleDatos.query().where({ 'ddt_dato_indicador_id': respuesta.preguntaId, 'ddt_reporte_id': reporteId }).first()
+      
+      let data: DetalleDatos = {
+        datoIndicadorId: respuesta.preguntaId,
+        valorEjecutado: respuesta.valor,
+        reporteId: reporteId,
+        fechaActualizacion: DateTime.fromJSDate(new Date),
+        anioActivoId: anioVigencia??2023
+      }
+
+      if (respuesta.documento) {
+        data.documento = respuesta.documento
+      }
+      if (respuesta.nombreArchivo) {
+        data.nombredocOriginal = respuesta.nombreArchivo
+      }
+      if (respuesta.ruta) {
+        data.ruta = respuesta.ruta
+      }
+     /*  if (respuesta.observacion) {
+        data.observacion = respuesta.observacion
+      } */
+
+      if (existeDatos) {
+        existeDatos.estableceDetalleDatosConId(data)
+        const resp = await existeDatos.save();
+
+      } else {
+        const respuestaDB = new TblDetalleDatos();
+        respuestaDB.establecerDetalleDatosDb(data)
+        respuestaDB.save();
+      }
+
+
+    }
+
+    for await (const adicional of adicionales) {
+    
+      const existeDatosE = await TblDetallesAdicionales.query().where({ 'dda_dato_adicional_id': adicional.adicionalId, 'dda_reporte_id': reporteId }).first()
+
+      let data: DetalleAdicional = {
+        datoAdicionalId: adicional.adicionalId,
+        reporteId: reporteId,
+        valor: adicional.valor,
+        fechaActualizacion: DateTime.fromJSDate(new Date),
+        anioActivoId: anioVigencia??2023
+      }
+
+      if (adicional.documento) {
+        data.documento = adicional.documento
+      }
+      if (adicional.nombreArchivo) {
+        data.nombredocOriginal = adicional.nombreArchivo
+      }
+      if (adicional.ruta) {
+        data.ruta = adicional.ruta
+      }
+       if (adicional.observacion) {
+        data.observacion = adicional.observacion
+      }
+
+
+      if (existeDatosE) {
+        existeDatosE.estableceDetalleAdicionalConId(data)
+        const evid = await existeDatosE.save();
+
+
+      } else {
+        const evidenciaDB = new TblDetallesAdicionales();
+        evidenciaDB.establecerDetalleAdicionalDb(data)
+        evidenciaDB.save();
+      }
+
+      if (adicional.documento) {
+        const temporal = await TblArchivosTemporales.query().where({ 'art_pregunta_id': adicional.adicionalId, 'art_usuario_id': documento, 'art_nombre_archivo': adicional.documento }).first()
+
+        await temporal?.delete()
+      }
+
+
+    }
+
+
+    return {
+      mensaje: "Formulario guardado correctamente"
+    }
+
+
   }
 }

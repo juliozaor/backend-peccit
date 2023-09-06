@@ -161,7 +161,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
         sqlSubTipoDato.preload('tipoDato')
       })
       sql.where('estado', 1)
-
+      sql.orderBy('orden', 'asc');
     }).where({ 'id_encuesta': idEncuesta }).first();
     const encuestaSql = await consulta
 
@@ -193,7 +193,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
         if (clasificacionSql.id === pregunta.clasificacion.id) {
           preguntasArr.push({
             idPregunta: pregunta.id,
-           // numeroPregunta: consecutivo,
+            numeroPregunta: consecutivo,
             pregunta: pregunta.pregunta,
             obligatoria: pregunta.obligatoria, //obligatorio,// 
             respuesta: pregunta.respuesta[0]?.valor ?? '',

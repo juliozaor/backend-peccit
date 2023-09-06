@@ -49,6 +49,12 @@ export default class ControladorReporte {
   }
 
 
+  public async respuestasEjecucion({ request, response }: HttpContextContract) {
+   
+    const payload = await request.obtenerPayloadJWT()
+    const respuesta = await this.service.guardarEjecucion(JSON.stringify(request.all()), payload)
 
+    response.status(200).send(respuesta)
+  }
 
 }

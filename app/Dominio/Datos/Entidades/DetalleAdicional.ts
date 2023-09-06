@@ -4,7 +4,7 @@ export class DetalleAdicional {
   datoAdicionalId: number; 
   estado?: boolean; 
   anioActivoId: number; 
-  reporteId: number; 
+  reporteId?: number; 
   fechaActualizacion: DateTime;
   documento?: string;
   ruta?: string;

@@ -5,7 +5,7 @@ export class TblDetallesAdicionales extends BaseModel {
   @column({ columnName: 'dda_id' }) public id?: number;
   @column({ columnName: 'dda_dato_adicional_id' }) public datoAdicionalId: number;
   @column({ columnName: 'dda_anio_activo_id' }) public anioActivoId: number;
-  @column({ columnName: 'dda_reporte_id' }) public reporteId: number;
+  @column({ columnName: 'dda_reporte_id' }) public reporteId?: number;
   @column({ columnName: 'dda_fecha_actualizacion' }) public fechaActualizacion: DateTime;
   @column({ columnName: 'dda_documento' }) public documento?: string;
   @column({ columnName: 'dda_ruta' }) public ruta?: string;

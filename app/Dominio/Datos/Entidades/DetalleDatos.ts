@@ -3,7 +3,7 @@ export class DetalleDatos {
   id?: number; 
   datoIndicadorId: number; 
   estado?: boolean; 
-  valor: number; 
+  valor?: number; 
   valorEjecutado?: number;
   anioActivoId: number; 
   reporteId: number; 
