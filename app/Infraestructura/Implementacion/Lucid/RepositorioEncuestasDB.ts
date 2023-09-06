@@ -265,6 +265,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
     const faltantes = new Array();
   //  const pasos = usuario?.clasificacionUsuario[0]?.clasificacion
     const respuestas = await TblRespuestas.query().where('id_reporte', idReporte).orderBy('id_pregunta', 'asc')
+    const reportes = await TblReporte.find(idReporte)
   
     const preguntas = await Preguntas.query().preload('tiposPregunta').where('estado',1);
    // pasos?.forEach(paso => {
@@ -333,7 +334,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
     if(confirmar) aprobado= true;
 
     if (aprobado) {
-      this.servicioEstado.Log(idUsuario, 1004, idEncuesta, undefined, confirmar)
+      this.servicioEstado.Log(idUsuario, 1004, reportes?.idEncuesta, undefined, confirmar)
       const reporte = await TblReporte.findOrFail(idReporte)
       const estado = (reporte.estadoVerificacionId === 7 || reporte.estadoVerificacionId === 1005) ? 4 : 1004
       reporte.fechaEnviost = DateTime.fromJSDate(new Date())
@@ -349,7 +350,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
         jsonNuevo: JSON.stringify(respuestas),
         vigilado: idVigilado,
         descripcion: 'Se envia a ST',
-        encuestaId: idEncuesta,
+        encuestaId: reportes?.idEncuesta,
         tipoLog: 5
 
       })
