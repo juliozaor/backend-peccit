@@ -237,9 +237,9 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
   async guardar(datos: string, documento: string): Promise<any> {
     const { respuestas, reporteId, evidencias, objetivos } = JSON.parse(datos);
 
-    const { anioVigencia } = await TblReporte.findByOrFail('id', reporteId)
+    const { anioVigencia, idEncuesta } = await TblReporte.findByOrFail('id', reporteId)
 
-    // this.servicioEstado.Log(documento, 1003, undefined, reporteId)
+     this.servicioEstado.Log(documento, 1003, idEncuesta, reporteId)
 
     if (objetivos.length >= 1) {
       await TblObjetivos.query().where('obj_usuario_id', documento).delete();
@@ -531,8 +531,8 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
   async guardarEjecucion(datos: string, documento: string): Promise<any> {
     const { respuestasActividades, reporteId, adicionales } = JSON.parse(datos);
 
-    const { anioVigencia } = await TblReporte.findByOrFail('id', reporteId)
-
+    const { anioVigencia, idEncuesta } = await TblReporte.findByOrFail('id', reporteId)
+    this.servicioEstado.Log(documento, 1006, idEncuesta, reporteId)
     for await (const respuesta of respuestasActividades) {
 
       const existeDatos = await TblDetalleDatos.query().where({ 'ddt_dato_indicador_id': respuesta.preguntaId, 'ddt_reporte_id': reporteId }).first()
@@ -680,14 +680,14 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       }
     });
 
-    /*  if (aprobado) {
-       this.servicioEstado.Log(idUsuario, 1004, reportes?.idEncuesta)
+     if (aprobado) {
+       this.servicioEstado.Log(idUsuario, 1007, reportes?.idEncuesta)
        const reporte = await TblReporte.findOrFail(idReporte)
-       reporte.fechaEnviost = DateTime.fromJSDate(new Date())
-       reporte.envioSt = '1'
-       reporte.estadoVerificacionId = 1004
+       reporte.fechaEnviostEjecucion = DateTime.fromJSDate(new Date())
+       reporte.envioStEjecucion = '1'
+       reporte.estadoVerificacionId = 1007
        reporte.save();
-     } */
+     }
 
     //return indicadores
     return { aprobado, faltantesActividades, faltantesAdicionales }
