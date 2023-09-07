@@ -32,4 +32,9 @@ export class ServicioIndicadores {
     return this.repositorio.guardarEjecucion(datos, documento);
   }
 
+  async enviarStEjecucion(params: any, payload:PayloadJWT): Promise<any> {
+    params.idUsuario = payload.documento;
+    return this.repositorio.enviarStEjecucion(params);
+  }
+
 }

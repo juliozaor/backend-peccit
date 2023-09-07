@@ -289,7 +289,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
             repuestaExiste = false
           } */
 
-          if (respuesta && respuesta.valor !== '' && (preguntaPaso.tieneObservacion)) {           
+          if ((respuesta && respuesta.valor !== '') && (preguntaPaso.tieneObservacion && preguntaPaso.tieneObservacion === true)) {           
            const datoClave = preguntaPaso.tiposPregunta.datoClave!;
            const arr = Object.values(datoClave);
            if(arr.length !== 0){            

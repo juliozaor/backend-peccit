@@ -192,9 +192,13 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
         formulario.actividades.forEach(actividad => {
           if (actividad.meses.length != 0) {
             actividad.meses.forEach(mes => {
-              if (mes.obligatoria && mes.respuesta === '') {
-                faltantesActividades.push(mes.datoId);
-                aprobado = false;
+              if (mes.obligatoria) {
+                if (!mes.respuesta || mes.respuesta === '') {
+
+                  faltantesActividades.push(mes.datoId);
+                  aprobado = false;
+                }
+
               }
             });
           }
@@ -344,26 +348,23 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
   async ejecucion(params: any): Promise<any> {
     const { idUsuario, idVigilado, idReporte, idMes } = params;
     const formularios: any = [];
-    //const reporte = await TblReporte.findOrFail(idReporte)
-    const anioVigencia = await TblAnioVigencias.query().where('anv_estado', true).orderBy('anv_id', 'desc').select('anv_anio').first()
-    const reporte = await TblReporte.query().where({ 'id_encuesta': 2, 'login_vigilado': idVigilado,'anio_vigencia':anioVigencia?.anio! }).first();
-    if (!reporte) {
+    const reporte = await TblReporte.findOrFail(idReporte)
+    //const anioVigencia = await TblAnioVigencias.query().where('anv_estado', true).orderBy('anv_id', 'desc').select('anv_anio').first()
+  //  const reporte = await TblReporte.query().where({ 'id_encuesta': 2, 'login_vigilado': idVigilado, 'anio_vigencia': anioVigencia?.anio! }).first();
+   /*  if (!reporte) {
       return {
         estado: false,
         codigo: 400,
         mensaje: "No se encontro una planeación para este usuario",
       }
-    }
-    const reporteId = reporte?.id!;
+    } */
     const consulta = TblFormulariosIndicadores.query()
     const vigencia = reporte?.anioVigencia ?? undefined
-
-
     consulta.preload('subIndicadores', subIndicador => {
       if (reporte && reporte.anioVigencia == 2023) {
         subIndicador.preload('datosIndicadores', datos => {
           datos.preload('detalleDatos', detalle => {
-            detalle.where('ddt_reporte_id', reporteId)
+            detalle.where('ddt_reporte_id', idReporte)
           })
           datos.where('dai_visible', true)
           datos.where('dai_meses', idMes)
@@ -375,7 +376,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       } else {
         subIndicador.preload('datosIndicadores', datos => {
           datos.preload('detalleDatos', detalle => {
-            detalle.where('ddt_reporte_id', reporteId)
+            detalle.where('ddt_reporte_id', idReporte)
           })
           datos.where('dai_meses', idMes)
         }).whereHas('datosIndicadores', datos => {
@@ -395,7 +396,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       if (reporte && reporte.anioVigencia == 2023) {
         sqlAdicional.preload('datosAdicionales', sqlDatosE => {
           sqlDatosE.preload('detalleAdicional', detalleV => {
-            detalleV.where('dda_reporte_id', reporteId)
+            detalleV.where('dda_reporte_id', idReporte)
           })
           sqlDatosE.where('dad_visible', true)
           sqlDatosE.where('dad_meses', idMes)
@@ -409,7 +410,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       } else {
         sqlAdicional.preload('datosAdicionales', sqlDatosE => {
           sqlDatosE.preload('detalleAdicional', detalleV => {
-            detalleV.where('dda_reporte_id', reporteId)
+            detalleV.where('dda_reporte_id', idReporte)
           })
           sqlDatosE.where('dad_meses', idMes)
         }).whereHas('datosAdicionales', sqlDatosE => {
@@ -424,7 +425,6 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
     const formulariosBD = await consulta.where('id', 5)
 
-    // return formulariosBD
 
     formulariosBD.forEach(formulario => {
       // const nombre = formulario.nombre
@@ -433,7 +433,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       formulario.subIndicadores.forEach(subInd => {
         // const preguntas: any = []
         subInd.datosIndicadores.forEach(datos => {
-
+         
           actividades.push({
             nombre: subInd.nombre,
             datoId: datos.id,
@@ -478,6 +478,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       const evidencias: any = [];
       formulario.adicionales.forEach(adicional => {
         adicional.datosAdicionales.forEach(datoAdicional => {
+         // console.log(datoAdicional.detalleAdicional);         
           evidencias.push({
             idAdicional: datoAdicional.id,
             pregunta: adicional.nombre,
@@ -531,8 +532,6 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     const { respuestasActividades, reporteId, adicionales } = JSON.parse(datos);
 
     const { anioVigencia } = await TblReporte.findByOrFail('id', reporteId)
-
-
 
     for await (const respuesta of respuestasActividades) {
 
@@ -625,4 +624,74 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
 
   }
+
+  async enviarStEjecucion(params: any): Promise<any> {
+    const { idReporte, idVigilado, idUsuario } = params
+    let aprobado = true;
+    const faltantesActividades = new Array();
+    const faltantesAdicionales = new Array();
+
+    const reportes = await TblReporte.find(idReporte)
+
+    const indicadores = await this.ejecucion(params)
+
+
+    indicadores.formularios.forEach(formulario => {
+      if (formulario.actividades.length != 0) {
+        formulario.actividades.forEach(actividad => {
+          if (actividad.obligatoria) {
+            if ((!actividad.respuesta || actividad.respuesta === '') || (actividad.adjuntableObligatorio && actividad.documento === '')) {
+              faltantesActividades.push(actividad.datoId);
+              aprobado = false;
+            }
+          }
+        });
+      }
+      if (formulario.adicionales.length != 0) {
+        formulario.adicionales.forEach(adicional => {
+          if (adicional.obligatoria) {
+            if ((!adicional.respuesta || adicional.respuesta === '')) {
+              faltantesAdicionales.push(adicional.idAdicional);
+              aprobado = false;
+            }
+            if ((adicional.respuesta && adicional.respuesta !== '') && (adicional.tieneObservacion && adicional.tieneObservacion == true)) {           
+              console.log("habilitaObservacion: ",adicional.habilitaObservacion);
+              
+              const datoClave = adicional.habilitaObservacion!;
+              const arr = Object.values(datoClave);
+              if(arr.length !== 0){            
+               arr.forEach(dato => {
+                 
+                if(adicional.respuesta === dato && (!adicional.observacion || adicional.observacion === '')){
+                  faltantesAdicionales.push(adicional.idAdicional);
+                  aprobado = false;
+                }
+                 
+               });
+              }
+              
+              
+               
+              
+             }
+          }
+        });
+
+      }
+    });
+
+    /*  if (aprobado) {
+       this.servicioEstado.Log(idUsuario, 1004, reportes?.idEncuesta)
+       const reporte = await TblReporte.findOrFail(idReporte)
+       reporte.fechaEnviost = DateTime.fromJSDate(new Date())
+       reporte.envioSt = '1'
+       reporte.estadoVerificacionId = 1004
+       reporte.save();
+     } */
+
+    //return indicadores
+    return { aprobado, faltantesActividades, faltantesAdicionales }
+
+  }
+
 }

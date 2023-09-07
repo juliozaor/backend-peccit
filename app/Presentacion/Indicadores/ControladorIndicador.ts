@@ -57,4 +57,13 @@ export default class ControladorReporte {
     response.status(200).send(respuesta)
   }
 
+  public async enviarEjecucion({ request, response }: HttpContextContract) {    
+    const payload = await request.obtenerPayloadJWT()
+    const enviado = await this.service.enviarStEjecucion(request.all(), payload)
+    if (enviado && !enviado.aprobado) {
+      return response.status(400).send(enviado)
+    }
+    return enviado
+  }
+
 }
