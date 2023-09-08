@@ -448,9 +448,9 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
               tamanio: subInd.tamanio,
               extension: subInd.subTipoDato.extension ?? ''
             },
-            documento: "",
-            nombreOriginal: "",
-            ruta: "",
+            documento: datos.detalleDatos[0]?.documento ?? '',
+            nombreOriginal: datos.detalleDatos[0]?.nombredocOriginal ?? '',
+            ruta: datos.detalleDatos[0]?.ruta ?? '',
             adjuntable: false,
             adjuntableObligatorio: false,
             tipoPregunta: "NUMBER",
