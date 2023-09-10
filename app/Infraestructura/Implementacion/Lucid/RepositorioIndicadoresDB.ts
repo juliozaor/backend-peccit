@@ -54,6 +54,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
       }
       subIndicador.preload('periodo')
+      subIndicador.orderBy('sub_orden', 'asc')
 
     })
 
