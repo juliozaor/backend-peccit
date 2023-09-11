@@ -223,6 +223,8 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
               tamanio: pregunta.tamanio,
               extension: pregunta.subTiposdatos.extension??''
             },
+            padre:pregunta.padre,
+            respuestaPadre:pregunta.respuestaPadre,
           });
           consecutivo++;
         }
