@@ -277,16 +277,14 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
       const respuesta = respuestas.find(r => r.idPregunta === pregunta.id)
 
       if (pregunta.padre) {
-        const preguntaPadre = preguntas.find(p => p.id == pregunta.padre);
+        //  const preguntaPadre = preguntas.find(p => p.id == pregunta.padre);
+        const respuestaPadre = respuestas.find(r => r.idPregunta === pregunta.padre)
+
         if (pregunta.obligatoria) {
           const arrRespuesta = Object.values(pregunta.respuestaPadre!);
           if (arrRespuesta.length !== 0) {
             arrRespuesta.forEach(dato => {
-
-              if (preguntaPadre?.respuesta === dato) {
-
-
-
+              if (respuestaPadre?.valor === dato) {
                 repuestaExiste = this.validarRespuesta(respuesta, pregunta);
               }
 
