@@ -151,8 +151,8 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
 
     const consulta = TblEncuestas.query().preload('pregunta', sql => {
       sql.preload('clasificacion')
-      sql.whereHas('clasificacion', sqlClass =>{
-        sqlClass.where('estado',1)
+      sql.whereHas('clasificacion', sqlClass => {
+        sqlClass.where('estado', 1)
       })
       sql.preload('tiposPregunta')
       sql.preload('respuesta', sqlResp => {
@@ -184,11 +184,11 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
     const claficiacionesSql = await TbClasificacion.query().orderBy('id_clasificacion', 'asc');
     let consecutivo: number = 1;
     claficiacionesSql.forEach(clasificacionSql => {
-      
+
       let preguntasArr: any = [];
       clasificacion = clasificacionSql.nombre;
       //validar si el paso es obligatorio      
-     // const obligatorio = pasos?.find(paso => paso.id === clasificacionSql.id) ? true : false;
+      // const obligatorio = pasos?.find(paso => paso.id === clasificacionSql.id) ? true : false;
       encuestaSql?.pregunta.forEach(pregunta => {
 
         if (clasificacionSql.id === pregunta.clasificacion.id) {
@@ -207,24 +207,24 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
             //tamanio: pregunta.tamanio,
             valoresPregunta: pregunta.tiposPregunta.opciones,
             validacionesPregunta: pregunta.tiposPregunta.validaciones,
-            tieneObservacion:pregunta.tieneObservacion,
+            tieneObservacion: pregunta.tieneObservacion,
             maxObservacion: pregunta.maxObservacion,
             observacion: pregunta.respuesta[0]?.observacion ?? '',
-          /*   cumple: pregunta.respuesta[0]?.cumple ?? '',
-            observacionCumple: pregunta.respuesta[0]?.observacionCumple ?? '',
-            corresponde: pregunta.respuesta[0]?.corresponde ?? '',
-            observacionCorresponde: pregunta.respuesta[0]?.observacionCorresponde ?? '', */            
-            tipo:pregunta.tipo,
+            /*   cumple: pregunta.respuesta[0]?.cumple ?? '',
+              observacionCumple: pregunta.respuesta[0]?.observacionCumple ?? '',
+              corresponde: pregunta.respuesta[0]?.corresponde ?? '',
+              observacionCorresponde: pregunta.respuesta[0]?.observacionCorresponde ?? '', */
+            tipo: pregunta.tipo,
             habilitaObservacion: pregunta.tiposPregunta.datoClave,
             tipoEvidencia: pregunta.subTiposdatos.tipoDato.nombre,
             validacionesEvidencia: {
               tipoDato: pregunta.tipoEvidencia,
-              cantDecimal: pregunta.subTiposdatos.decimales??0,
+              cantDecimal: pregunta.subTiposdatos.decimales ?? 0,
               tamanio: pregunta.tamanio,
-              extension: pregunta.subTiposdatos.extension??''
+              extension: pregunta.subTiposdatos.extension ?? ''
             },
-            padre:pregunta.padre,
-            respuestaPadre:pregunta.respuestaPadre,
+            padre: pregunta.padre,
+            respuestaPadre: pregunta.respuestaPadre,
           });
           consecutivo++;
         }
@@ -233,7 +233,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
       if (preguntasArr.length >= 1) {
         clasificacionesArr.push(
           {
-            clasificacion,            
+            clasificacion,
             preguntas: preguntasArr
           }
 
@@ -250,90 +250,93 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
       encuestaEditable,
       clasificaion: nombreClasificaion,
       descripcionClasificacion,
-     // observacion: encuestaSql?.observacion,
-     sedes:usuario?.sedesOperativas,
+      // observacion: encuestaSql?.observacion,
+      sedes: usuario?.sedesOperativas,
       clasificaciones: clasificacionesArr,
-     
+
     }
 
     return encuesta
   }
 
   async enviarSt(params: any): Promise<any> {
-    const {  idReporte, idVigilado, idUsuario, confirmar =false } = params
+    const { idReporte, idVigilado, idUsuario, confirmar = false } = params
     const usuario = await TblUsuarios.query().where('identificacion', idUsuario).first()
 
     let aprobado = true;
     const faltantes = new Array();
-  //  const pasos = usuario?.clasificacionUsuario[0]?.clasificacion
+    //  const pasos = usuario?.clasificacionUsuario[0]?.clasificacion
     const respuestas = await TblRespuestas.query().where('id_reporte', idReporte).orderBy('id_pregunta', 'asc')
     const reportes = await TblReporte.find(idReporte)
-  
-    const preguntas = await Preguntas.query().preload('tiposPregunta').where('estado',1);
-   // pasos?.forEach(paso => {
-     preguntas.forEach(preguntaPaso => {
-        let repuestaExiste = true
-        let archivoExiste = true
-        const respuesta = respuestas.find(r => r.idPregunta === preguntaPaso.id)
-        if (preguntaPaso.obligatoria) {
-          if (!respuesta) {
-            //throw new NoAprobado('Faltan preguntas por responder')     
-           
-            
-            repuestaExiste = false
-          }
 
-          if (respuesta && respuesta.valor === '') {
-            repuestaExiste = false
-          }
+    const preguntas = await Preguntas.query().preload('tiposPregunta').where('estado', 1);
+    // pasos?.forEach(paso => {
+    preguntas.forEach(pregunta => {
+      let repuestaExiste = true
+      let archivoExiste = true
+      const respuesta = respuestas.find(r => r.idPregunta === pregunta.id)
 
-         /*  if (respuesta && respuesta.valor === 'N' && (!respuesta.observacion || respuesta.observacion === '')) {
-            repuestaExiste = false
-          } */
+      if (pregunta.padre) {
+        const preguntaPadre = preguntas.find(p => p.id == pregunta.padre);
+        if (pregunta.obligatoria) {
+          const arrRespuesta = Object.values(pregunta.respuestaPadre!);
+          if (arrRespuesta.length !== 0) {
+            arrRespuesta.forEach(dato => {
 
-          if ((respuesta && respuesta.valor !== '') && (preguntaPaso.tieneObservacion && preguntaPaso.tieneObservacion === true)) {           
-           const datoClave = preguntaPaso.tiposPregunta.datoClave!;
-           const arr = Object.values(datoClave);
-           if(arr.length !== 0){            
-            arr.forEach(dato => {
-              
-             if(respuesta.valor === dato && (!respuesta.observacion || respuesta.observacion === '')){
-              repuestaExiste = false
-             }
-              
+              if (preguntaPadre?.respuesta === dato) {
+
+
+
+                repuestaExiste = this.validarRespuesta(respuesta, pregunta);
+              }
+
             });
-           }
-           
-           
-            
-           
           }
 
-
-        /*   if (respuesta && respuesta.valor === 'S' && preguntaPaso.adjuntableObligatorio) {
-            console.log(respuesta.observacion);
-
-            archivoExiste = this.validarDocumento(respuesta, preguntaPaso);
-          } */
-
         }
 
 
-        if (!repuestaExiste ) {
-          aprobado = false
-          faltantes.push({
-            preguntaId: preguntaPaso.id,
-           // archivoObligatorio: preguntaPaso.adjuntableObligatorio
-          })
+      } else {
+        repuestaExiste = this.validarRespuesta(respuesta, pregunta);
+      }
+      /*  if (pregunta.obligatoria) {
 
-        }
+         if (!respuesta) {            
+           repuestaExiste = false
+         }
+         if (respuesta && respuesta.valor === '') {
+           repuestaExiste = false
+         }
+         if ((respuesta && respuesta.valor !== '') && (pregunta.tieneObservacion && pregunta.tieneObservacion === true)) {           
+          const datoClave = pregunta.tiposPregunta.datoClave!;
+          const arr = Object.values(datoClave);
+          if(arr.length !== 0){            
+           arr.forEach(dato => {
+             
+            if(respuesta.valor === dato && (!respuesta.observacion || respuesta.observacion === '')){
+             repuestaExiste = false
+            }
+             
+           });
+          }
+         }
+       } */
+
+      if (!repuestaExiste) {
+        aprobado = false
+        faltantes.push({
+          preguntaId: pregunta.id,
+          // archivoObligatorio: pregunta.adjuntableObligatorio
+        })
+
+      }
 
 
-  });
+    });
 
-   // });
+    // });
 
-    if(confirmar) aprobado= true;
+    if (confirmar) aprobado = true;
 
     if (aprobado) {
       this.servicioEstado.Log(idUsuario, 1004, reportes?.idEncuesta, undefined, confirmar)
@@ -357,27 +360,27 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
 
       })
 
-      
-      
-      try {      
+
+
+      try {
         this.enviadorEmail = new EnviadorEmailAdonis()
-            await this.enviadorEmail.enviarTemplate({
-              asunto: 'Envío a ST.',
-              destinatarios: usuario?.correo!,
-              de: Env.get('SMTP_USERNAME')
-            }, new EmailnotificacionCorreo({
-              nombre: usuario?.nombre!,
-              mensaje: 'De la manera más cordial nos permitimos informarle que la información Plan Estratégico de Seguridad Vial fue enviado de manera correcta a la Superintendencia de Transporte.',
-              logo: Env.get('LOGO'),
-              nit:usuario?.identificacion!
-            }))
+        await this.enviadorEmail.enviarTemplate({
+          asunto: 'Envío a ST.',
+          destinatarios: usuario?.correo!,
+          de: Env.get('SMTP_USERNAME')
+        }, new EmailnotificacionCorreo({
+          nombre: usuario?.nombre!,
+          mensaje: 'De la manera más cordial nos permitimos informarle que la información Plan Estratégico de Seguridad Vial fue enviado de manera correcta a la Superintendencia de Transporte.',
+          logo: Env.get('LOGO'),
+          nit: usuario?.identificacion!
+        }))
       } catch (error) {
-        console.log(error);      
+        console.log(error);
       }
-      
+
     }
 
-    return {  aprobado, faltantes  }
+    return { aprobado, faltantes }
 
   }
 
@@ -389,5 +392,30 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
     return true
   }
 
+  validarRespuesta = (respuesta: any, pregunta: any): boolean => {
+    if (pregunta.obligatoria) {
+
+      if (!respuesta) {
+        return false
+      }
+      if (respuesta && respuesta.valor === '') {
+        return false
+      }
+      if ((respuesta && respuesta.valor !== '') && (pregunta.tieneObservacion && pregunta.tieneObservacion === true)) {
+        const datoClave = pregunta.tiposPregunta.datoClave!;
+        const arr = Object.values(datoClave);
+        if (arr.length !== 0) {
+          arr.forEach(dato => {
+
+            if (respuesta.valor === dato && (!respuesta.observacion || respuesta.observacion === '')) {
+              return false
+            }
+
+          });
+        }
+      }
+    }
+    return true
+  }
 
 }
