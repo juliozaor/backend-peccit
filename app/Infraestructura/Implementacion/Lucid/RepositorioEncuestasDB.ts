@@ -21,6 +21,7 @@ import { EmailnotificacionCorreo } from 'App/Dominio/Email/Emails/EmailNotificac
 import Env from '@ioc:Adonis/Core/Env';
 import { EnviadorEmailAdonis } from 'App/Infraestructura/Email/EnviadorEmailAdonis';
 import Preguntas from 'App/Infraestructura/Datos/Entidad/Pregunta';
+import { TblSedesOperativas } from 'App/Infraestructura/Datos/Entidad/SedesOperativas';
 export class RepositorioEncuestasDB implements RepositorioEncuesta {
   private servicioAuditoria = new ServicioAuditoria();
   private servicioEstado = new ServicioEstados();
@@ -264,6 +265,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
     const usuario = await TblUsuarios.query().where('identificacion', idUsuario).first()
 
     let aprobado = true;
+    let sedes = true;
     const faltantes = new Array();
     //  const pasos = usuario?.clasificacionUsuario[0]?.clasificacion
     const respuestas = await TblRespuestas.query().where('id_reporte', idReporte).orderBy('id_pregunta', 'asc')
@@ -332,9 +334,20 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
 
     });
 
+
+
     // });
 
     if (confirmar) aprobado = true;
+
+//Verificar sedes
+const sedesOperativas = TblSedesOperativas.query().where('seo_usuario_id',idUsuario ).first();
+if(!sedesOperativas ){
+  aprobado=false ;
+  sedes = false;
+}
+
+
 
     if (aprobado) {
       this.servicioEstado.Log(idUsuario, 1004, reportes?.idEncuesta, undefined, confirmar)
@@ -378,7 +391,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
 
     }
 
-    return { aprobado, faltantes }
+    return { aprobado, faltantes, sedes }
 
   }
 
