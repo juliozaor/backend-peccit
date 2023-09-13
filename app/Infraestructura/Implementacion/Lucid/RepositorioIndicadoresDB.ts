@@ -388,7 +388,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       }
       subIndicador.preload('periodo')
       subIndicador.preload('subTipoDato')
-
+      subIndicador.orderBy('sub_orden', 'asc')
     })
 
     //Evidencias

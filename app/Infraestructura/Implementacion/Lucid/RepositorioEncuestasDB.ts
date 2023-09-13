@@ -342,7 +342,6 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
 
 //Verificar sedes
 const sedesOperativas = await TblSedesOperativas.query().where('seo_usuario_id',idUsuario ).first();
-console.log(sedesOperativas);
 
 if(!sedesOperativas ){
   aprobado=false ;
