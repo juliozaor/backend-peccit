@@ -249,6 +249,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
       estadoActual: estado,
       nombreEncuesta: encuestaSql?.nombre,
       encuestaEditable,
+      idVigilado,
       clasificaion: nombreClasificaion,
       descripcionClasificacion,
       // observacion: encuestaSql?.observacion,
