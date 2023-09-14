@@ -25,7 +25,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     const { idUsuario, idVigilado, idReporte, idMes } = params;
     const formularios: any = [];
     const reporte = await TblReporte.findOrFail(idReporte)
-   const soloLectura = (idUsuario !== idVigilado);
+   const soloLectura = (idUsuario === idVigilado);
     const consulta = TblFormulariosIndicadores.query()
     const vigencia = reporte.anioVigencia ?? undefined
     const usuario = await TblUsuarios.query().preload('objetivos', sqlObj => {
@@ -352,7 +352,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     const { idUsuario, idVigilado, idReporte, idMes } = params;
     const formularios: any = [];
     const reporte = await TblReporte.findOrFail(idReporte)
-    const soloLectura = (idUsuario !== idVigilado);
+    const soloLectura = (idUsuario === idVigilado);
     //const anioVigencia = await TblAnioVigencias.query().where('anv_estado', true).orderBy('anv_id', 'desc').select('anv_anio').first()
   //  const reporte = await TblReporte.query().where({ 'id_encuesta': 2, 'login_vigilado': idVigilado, 'anio_vigencia': anioVigencia?.anio! }).first();
    /*  if (!reporte) {
