@@ -277,7 +277,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
       let repuestaExiste = true
       let archivoExiste = true
       const respuesta = respuestas.find(r => r.idPregunta === pregunta.id)
-
+      const datoClave = pregunta.tiposPregunta.datoClave;
       if (pregunta.padre) {
         //  const preguntaPadre = preguntas.find(p => p.id == pregunta.padre);
         const respuestaPadre = respuestas.find(r => r.idPregunta === pregunta.padre)
@@ -287,7 +287,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
           if (arrRespuesta.length !== 0) {
             arrRespuesta.forEach(dato => {
               if (respuestaPadre?.valor === dato) {
-                repuestaExiste = this.validarRespuesta(respuesta, pregunta);
+                repuestaExiste = this.validarRespuesta(respuesta, pregunta, datoClave);
               }
 
             });
@@ -297,30 +297,9 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
 
 
       } else {
-        repuestaExiste = this.validarRespuesta(respuesta, pregunta);
+        repuestaExiste = this.validarRespuesta(respuesta, pregunta, datoClave);
       }
-      /*  if (pregunta.obligatoria) {
-
-         if (!respuesta) {            
-           repuestaExiste = false
-         }
-         if (respuesta && respuesta.valor === '') {
-           repuestaExiste = false
-         }
-         if ((respuesta && respuesta.valor !== '') && (pregunta.tieneObservacion && pregunta.tieneObservacion === true)) {           
-          const datoClave = pregunta.tiposPregunta.datoClave!;
-          const arr = Object.values(datoClave);
-          if(arr.length !== 0){            
-           arr.forEach(dato => {
-             
-            if(respuesta.valor === dato && (!respuesta.observacion || respuesta.observacion === '')){
-             repuestaExiste = false
-            }
-             
-           });
-          }
-         }
-       } */
+      
 
       if (!repuestaExiste) {
         aprobado = false
@@ -404,7 +383,7 @@ if(!sedesOperativas ){
     return true
   }
 
-  validarRespuesta = (respuesta: any, pregunta: any): boolean => {
+  validarRespuesta = (respuesta: any, pregunta: any, datoClave:any): boolean => {
     if (pregunta.obligatoria) {
 
       if (!respuesta) {
@@ -414,7 +393,7 @@ if(!sedesOperativas ){
         return false
       }
       if ((respuesta && respuesta.valor !== '') && (pregunta.tieneObservacion && pregunta.tieneObservacion === true)) {
-        const datoClave = pregunta.tiposPregunta.datoClave!;
+        //const datoClave = pregunta.tiposPregunta.datoClave!;
         const arr = Object.values(datoClave);
         if (arr.length !== 0) {
           arr.forEach(dato => {
