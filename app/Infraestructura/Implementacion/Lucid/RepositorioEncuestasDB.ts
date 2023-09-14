@@ -279,6 +279,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
       const respuesta = respuestas.find(r => r.idPregunta === pregunta.id)
       const datoClave = pregunta.tiposPregunta.datoClave;
       if (pregunta.padre) {
+       
         //  const preguntaPadre = preguntas.find(p => p.id == pregunta.padre);
         const respuestaPadre = respuestas.find(r => r.idPregunta === pregunta.padre)
 
@@ -288,6 +289,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
             arrRespuesta.forEach(dato => {
               if (respuestaPadre?.valor === dato) {
                 repuestaExiste = this.validarRespuesta(respuesta, pregunta, datoClave);
+               
               }
 
             });
@@ -384,29 +386,34 @@ if(!sedesOperativas ){
   }
 
   validarRespuesta = (respuesta: any, pregunta: any, datoClave:any): boolean => {
+
+    let validacion = true
     if (pregunta.obligatoria) {
 
       if (!respuesta) {
-        return false
+        validacion = false
       }
       if (respuesta && respuesta.valor === '') {
-        return false
+        validacion =  false
       }
       if ((respuesta && respuesta.valor !== '') && (pregunta.tieneObservacion && pregunta.tieneObservacion === true)) {
         //const datoClave = pregunta.tiposPregunta.datoClave!;
+       
         const arr = Object.values(datoClave);
         if (arr.length !== 0) {
           arr.forEach(dato => {
-
+            
             if (respuesta.valor === dato && (!respuesta.observacion || respuesta.observacion === '')) {
-              return false
+                
+             
+              validacion =  false              
             }
 
           });
         }
       }
     }
-    return true
+    return validacion
   }
 
 }
