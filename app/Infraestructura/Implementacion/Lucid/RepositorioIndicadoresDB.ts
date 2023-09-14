@@ -15,16 +15,17 @@ import { Objetivo } from 'App/Dominio/Datos/Entidades/objetivo';
 import { TblDetallesAdicionales } from 'App/Infraestructura/Datos/Entidad/DetalleAdicionales';
 import { DetalleAdicional } from 'App/Dominio/Datos/Entidades/DetalleAdicional';
 import { TblAnioVigencias } from 'App/Infraestructura/Datos/Entidad/AnioVigencia';
+import { ServicioAcciones } from 'App/Dominio/Datos/Servicios/ServicioAcciones';
 
 export class RepositorioIndicadoresDB implements RepositorioIndicador {
   private servicioAuditoria = new ServicioAuditoria();
   private servicioEstado = new ServicioEstados();
-
+  private servicioAcciones = new ServicioAcciones();
   async visualizar(params: any): Promise<any> {
     const { idUsuario, idVigilado, idReporte, idMes } = params;
     const formularios: any = [];
     const reporte = await TblReporte.findOrFail(idReporte)
-
+   const soloLectura = (idUsuario !== idVigilado);
     const consulta = TblFormulariosIndicadores.query()
     const vigencia = reporte.anioVigencia ?? undefined
     const usuario = await TblUsuarios.query().preload('objetivos', sqlObj => {
@@ -160,6 +161,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       formularios.push({
         nombre,
         evidencias,
+        soloLectura,
         // mensaje,
         cabeceras,
         actividades: subIndicador,
@@ -350,6 +352,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     const { idUsuario, idVigilado, idReporte, idMes } = params;
     const formularios: any = [];
     const reporte = await TblReporte.findOrFail(idReporte)
+    const soloLectura = (idUsuario !== idVigilado);
     //const anioVigencia = await TblAnioVigencias.query().where('anv_estado', true).orderBy('anv_id', 'desc').select('anv_anio').first()
   //  const reporte = await TblReporte.query().where({ 'id_encuesta': 2, 'login_vigilado': idVigilado, 'anio_vigencia': anioVigencia?.anio! }).first();
    /*  if (!reporte) {
@@ -512,6 +515,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
       formularios.push({
         nombre: "Ejecución",
+        soloLectura,
         // mensaje,
         adicionales: evidencias,
         actividades,
