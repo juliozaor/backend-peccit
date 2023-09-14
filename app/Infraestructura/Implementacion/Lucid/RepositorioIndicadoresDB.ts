@@ -160,8 +160,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
       formularios.push({
         nombre,
-        evidencias,
-        soloLectura,
+        evidencias,        
         // mensaje,
         cabeceras,
         actividades: subIndicador,
@@ -175,6 +174,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       idReporte,
       idEncuesta: reporte.idEncuesta,
       vigencia,
+      soloLectura,
       formularios
     }
   }
@@ -514,8 +514,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       })
 
       formularios.push({
-        nombre: "Ejecución",
-        soloLectura,
+        nombre: "Ejecución",        
         // mensaje,
         adicionales: evidencias,
         actividades,
@@ -528,6 +527,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       idReporte,
       idEncuesta: 3,
       vigencia,
+      soloLectura,
       mes: idMes,
       formularios
     }
