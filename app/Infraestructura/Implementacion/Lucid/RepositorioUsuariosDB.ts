@@ -79,8 +79,8 @@ if(params.termino){
     await usuarioRetorno.save()
     
     this.servicioAuditoria.Auditar({
-      accion: "Actualizar Usuario",
-      modulo: "Usuarios",
+      accion: "Actualizar Usuario PECCIT",
+      modulo: "Usuarios PECCIT",
       jsonAnterior: JSON.stringify(usuarioAnterior),
       jsonNuevo: JSON.stringify(usuarioRetorno),
       usuario: payload?.documento ?? '',

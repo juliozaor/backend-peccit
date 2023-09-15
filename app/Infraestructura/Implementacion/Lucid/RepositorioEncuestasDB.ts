@@ -96,8 +96,8 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
       this.servicioEstado.Log(idUsuario, 1002, idEncuesta)
 
       this.servicioAuditoria.Auditar({
-        accion: "Listar Encuestas",
-        modulo: "Encuesta",
+        accion: "Listar Informacion General PECCIT",
+        modulo: "Ingormación General PECCIT",
         usuario: idUsuario,
         vigilado: idVigilado,
         descripcion: 'Entra por primera vez a la encuesta',
@@ -343,8 +343,8 @@ if(!sedesOperativas ){
 
 
       this.servicioAuditoria.Auditar({
-        accion: "Enviar a St",
-        modulo: "Encuesta",
+        accion: "Enviar a St info general PECCIT",
+        modulo: "Información General PECCIT",
         usuario: idUsuario,
         jsonNuevo: JSON.stringify(respuestas),
         vigilado: idVigilado,
