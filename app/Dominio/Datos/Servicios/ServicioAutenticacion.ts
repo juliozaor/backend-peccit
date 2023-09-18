@@ -82,8 +82,8 @@ export class ServicioAutenticacion {
 
 
     this.servicioAuditoria.Auditar({
-      accion: "Inicio de sesión",
-      modulo: "Autenticación",
+      accion: "Inicio de sesión PECCIT",
+      modulo: "Autenticación PECCIT",
       usuario: usuarioVerificado.identificacion,
       descripcion: 'Inicio de sesión'
     })

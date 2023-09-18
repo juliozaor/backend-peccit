@@ -9,13 +9,14 @@ import { ServicioEstados } from 'App/Dominio/Datos/Servicios/ServicioEstados';
 import { PayloadJWT } from 'App/Dominio/Dto/PayloadJWT';
 import { ServicioEstadosVerificado } from 'App/Dominio/Datos/Servicios/ServicioEstadosVerificado';
 import TblUsuarios from 'App/Infraestructura/Datos/Entidad/Usuario';
+import { TblSedesOperativas } from 'App/Infraestructura/Datos/Entidad/SedesOperativas';
 export class RepositorioRespuestasDB implements RepositorioRespuesta {
   private servicioAuditoria = new ServicioAuditoria();
   private servicioEstado = new ServicioEstados();
   private servicioEstadoVerificado = new ServicioEstadosVerificado()
 
   async guardar(datos: string, idReporte: number, documento: string): Promise<any> {
-    const { respuestas } = JSON.parse(datos);
+    const { respuestas, sedes } = JSON.parse(datos);
     const { usuarioCreacion, loginVigilado, idEncuesta, estadoVerificacionId } = await TblReporte.findByOrFail('id', idReporte)
     let estado = 1003
     if (estadoVerificacionId === 7 || estadoVerificacionId === 1005) {
@@ -23,14 +24,28 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
     }
     this.servicioEstado.Log(loginVigilado, estado, idEncuesta, idReporte)
     this.servicioAuditoria.Auditar({
-      accion: "Guardar Respuesta",
-      modulo: "Encuesta",
+      accion: "Guardar Respuesta PECCIT",
+      modulo: "Información general PECCIT",
       usuario: usuarioCreacion ?? '',
       vigilado: loginVigilado ?? '',
       descripcion: 'Primer guardado de la encuesta',
       encuestaId: idEncuesta,
       tipoLog: 4
     })
+
+    /* if(sedes.length >= 1){
+      await TblSedesOperativas.query().where('seo_usuario_id', documento).delete();
+   } */
+   await TblSedesOperativas.query().where('seo_usuario_id', documento).delete();
+
+    for await (const sede of sedes) {
+      sede.usuarioId = documento;
+      const sedesOperativas = new TblSedesOperativas();
+       sedesOperativas.estableceSedeConId(sede);
+       sedesOperativas.save();
+    }
+
+
     for await (const respuesta of respuestas) {
       //validar si existe
       const existeRespuesta = await TblRespuestas.query().where({ 'id_pregunta': respuesta.preguntaId, 'id_reporte': idReporte }).first()
@@ -58,15 +73,11 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
 
       if (existeRespuesta) {
-
-
         existeRespuesta.estableceRespuestaConId(data)
         const resp = await existeRespuesta.save();
-
-
         this.servicioAuditoria.Auditar({
-          accion: "Actualizar Respuesta",
-          modulo: "Encuesta",
+          accion: "Actualizar Respuesta PECCIT",
+          modulo: "Informacion General PECCIT",
           jsonAnterior: JSON.stringify(existeRespuesta.$attributes),
           jsonNuevo: JSON.stringify(resp.$attributes),
           usuario: usuarioCreacion ?? '',
@@ -74,8 +85,6 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
           descripcion: 'Actualización de respuesta',
           encuestaId: idEncuesta
         })
-
-
       } else {
 
         const respuestaDB = new TblRespuestas();

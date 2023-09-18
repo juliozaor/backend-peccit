@@ -19,4 +19,6 @@ export class Pregunta {
   maxObservacion?: number;
   tipo?: number;
   tieneObservacion?: boolean;
+  padre?: number;
+  respuestaPadre?: JSON;
 }

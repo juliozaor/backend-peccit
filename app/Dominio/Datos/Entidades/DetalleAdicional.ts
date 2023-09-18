@@ -1,16 +1,14 @@
 import { DateTime } from 'luxon'
-export class DetalleDatos {
+export class DetalleAdicional {
   id?: number; 
-  datoIndicadorId: number; 
+  datoAdicionalId: number; 
   estado?: boolean; 
-  valor?: number; 
-  valorEjecutado?: number;
   anioActivoId: number; 
-  reporteId: number; 
+  reporteId?: number; 
   fechaActualizacion: DateTime;
   documento?: string;
   ruta?: string;
+  valor?:string;
   nombredocOriginal?: string;
   observacion?: string;
-
 }

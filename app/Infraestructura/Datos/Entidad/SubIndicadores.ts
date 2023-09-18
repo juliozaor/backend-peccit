@@ -3,6 +3,7 @@ import { TblIndicadores } from './Indicadores';
 import { TblFormulariosIndicadores } from './FormularioIndicadores';
 import { TblPeriodos } from './Periodos';
 import { TblDatosIndicadores } from './DatosIndicadores';
+import { TblSubTipoDatos } from './SubTipoDato';
 export class TblSubIndicadores extends BaseModel {
 
   @column({ columnName: 'sub_id' }) public id?: number;
@@ -14,6 +15,11 @@ export class TblSubIndicadores extends BaseModel {
   @column({ columnName: 'sub_periodo_id' }) public periodoId: number;
   @column({ columnName: 'sub_estado' }) public estado: boolean;
   @column({ columnName: 'sub_obligatorio' }) public obligatorio?: boolean;
+  @column({ columnName: 'sub_tipo_evidencia' }) public tipoEvidencia?: string;
+  @column({ columnName: 'sub_adjuntable' }) public adjuntable?: boolean;
+  @column({ columnName: 'sub_adjuntable_obligatorio' }) public adjuntableObligatorio?: boolean;
+  @column({ columnName: 'sub_tamanio' }) public tamanio?: number;
+  @column({ columnName: 'sub_tipo_dato_id' }) public subTipoDatoId?: number;
 
   @belongsTo(() => TblIndicadores, {
     localKey: 'id',
@@ -38,4 +44,11 @@ export class TblSubIndicadores extends BaseModel {
     foreignKey: 'subIndicadorId',
   })
   public datosIndicadores: HasMany<typeof TblDatosIndicadores>
+
+  @belongsTo(() => TblSubTipoDatos, {
+    localKey: 'id',
+    foreignKey: 'subTipoDatoId',
+  })
+  public subTipoDato: BelongsTo<typeof TblSubTipoDatos>
+
 }
