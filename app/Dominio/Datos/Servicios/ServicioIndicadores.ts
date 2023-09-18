@@ -9,6 +9,7 @@ export class ServicioIndicadores {
 
   async visualizar(params: any, payload:PayloadJWT): Promise<any> {
     params.idUsuario = payload.documento;
+    params.idRol = payload.idRol;
     return this.repositorio.visualizar(params);
   }
 
@@ -24,6 +25,7 @@ export class ServicioIndicadores {
 
   async ejecucion(params: any, payload:PayloadJWT): Promise<any> {
     params.idUsuario = payload.documento;
+    params.idRol = payload.idRol;
     return this.repositorio.ejecucion(params);
   }
 
