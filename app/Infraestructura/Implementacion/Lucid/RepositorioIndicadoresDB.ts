@@ -22,10 +22,11 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
   private servicioEstado = new ServicioEstados();
   private servicioAcciones = new ServicioAcciones();
   async visualizar(params: any): Promise<any> {
-    const { idUsuario, idVigilado, idReporte, idMes } = params;
+    const { idUsuario, idVigilado, idReporte, idMes, idRol } = params;
     const formularios: any = [];
     const reporte = await TblReporte.findOrFail(idReporte)
-    const soloLectura = (idUsuario !== idVigilado);
+    const { encuestaEditable } = await this.servicioAcciones.obtenerAccion(reporte?.estadoVerificacionId ?? 0, idRol);
+    const soloLectura = (idUsuario !== idVigilado || !encuestaEditable)??false;
     const consulta = TblFormulariosIndicadores.query()
     const vigencia = reporte.anioVigencia ?? undefined
     const usuario = await TblUsuarios.query().preload('objetivos', sqlObj => {
@@ -349,10 +350,11 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
   }
 
   async ejecucion(params: any): Promise<any> {
-    const { idUsuario, idVigilado, idReporte, historico, idMes } = params;
+    const { idUsuario, idVigilado, idReporte, historico, idMes, idRol } = params;
     const formularios: any = [];
     const reporte = await TblReporte.findOrFail(idReporte)
-    const soloLectura = (historico && historico == 'true' || idUsuario !== idVigilado);
+    const { encuestaEditable } = await this.servicioAcciones.obtenerAccion(reporte?.estadoVerificacionId ?? 0, idRol);
+    const soloLectura = (historico && historico == 'true' || idUsuario !== idVigilado || !encuestaEditable)??false;
     //const anioVigencia = await TblAnioVigencias.query().where('anv_estado', true).orderBy('anv_id', 'desc').select('anv_anio').first()
     //  const reporte = await TblReporte.query().where({ 'id_encuesta': 2, 'login_vigilado': idVigilado, 'anio_vigencia': anioVigencia?.anio! }).first();
     /*  if (!reporte) {
