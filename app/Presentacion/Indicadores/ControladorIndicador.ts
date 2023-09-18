@@ -44,6 +44,8 @@ export default class ControladorReporte {
 
   public async ejecucion({ request, response }: HttpContextContract) {
     const payload = await request.obtenerPayloadJWT()
+    console.log(request.all());
+    
     const encuestas = await this.service.ejecucion(request.all(), payload)
     return encuestas   
   }
