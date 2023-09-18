@@ -12,6 +12,8 @@ export class ServicioAcciones {
       default:
         return {
           encuestaEditable: false,
+          planeacionEditable: false,
+          ejecucionEditable: false,
           verificacionVisible: false,
           verificacionEditable: false
         }
@@ -24,15 +26,25 @@ export class ServicioAcciones {
     let encuestaEditable = true
     let verificacionVisible = false
     let verificacionEditable = false
+    let planeacionEditable= true
+    let ejecucionEditable = true
 
 
     if (estado === 7) {
       verificacionVisible = true
     }
-    if (estado === 2 || estado === 3 || estado === 4 || estado === 6 || estado === 1 || estado === 1004 || estado === 1007) {
+    if (estado === 2 || estado === 3 || estado === 4 || estado === 6 || estado === 1 || estado === 1004) {
       encuestaEditable = false
       verificacionVisible = false
     }
+
+    if (estado === 1007) {
+      ejecucionEditable = false
+    }
+    if (estado === 1009) {
+      planeacionEditable = false
+    }
+
 
     if (estado === 6) {
       encuestaEditable = false
@@ -43,7 +55,9 @@ export class ServicioAcciones {
     return {
       encuestaEditable,
       verificacionVisible,
-      verificacionEditable
+      verificacionEditable,
+      ejecucionEditable,
+      planeacionEditable
     }
   }
 
@@ -51,7 +65,8 @@ export class ServicioAcciones {
     let encuestaEditable = false
     let verificacionVisible = true
     let verificacionEditable = true
-
+    let planeacionEditable= false
+    let ejecucionEditable= false
 
 
     if (estado === 3 || estado === 6 || estado === 7) {
@@ -66,7 +81,9 @@ export class ServicioAcciones {
     return {
       encuestaEditable,
       verificacionVisible,
-      verificacionEditable
+      verificacionEditable,
+      planeacionEditable,
+      ejecucionEditable,
     }
   }
 
