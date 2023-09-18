@@ -25,7 +25,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     const { idUsuario, idVigilado, idReporte, idMes } = params;
     const formularios: any = [];
     const reporte = await TblReporte.findOrFail(idReporte)
-   const soloLectura = (idUsuario !== idVigilado);
+    const soloLectura = (idUsuario !== idVigilado);
     const consulta = TblFormulariosIndicadores.query()
     const vigencia = reporte.anioVigencia ?? undefined
     const usuario = await TblUsuarios.query().preload('objetivos', sqlObj => {
@@ -160,7 +160,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
       formularios.push({
         nombre,
-        evidencias,        
+        evidencias,
         // mensaje,
         cabeceras,
         actividades: subIndicador,
@@ -242,7 +242,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
     const { anioVigencia, idEncuesta } = await TblReporte.findByOrFail('id', reporteId)
 
-     this.servicioEstado.Log(documento, 1003, idEncuesta, reporteId)
+    this.servicioEstado.Log(documento, 1003, idEncuesta, reporteId)
 
     if (objetivos.length >= 1) {
       await TblObjetivos.query().where('obj_usuario_id', documento).delete();
@@ -349,19 +349,19 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
   }
 
   async ejecucion(params: any): Promise<any> {
-    const { idUsuario, idVigilado, idReporte, idMes } = params;
+    const { idUsuario, idVigilado, idReporte, historico, idMes } = params;
     const formularios: any = [];
     const reporte = await TblReporte.findOrFail(idReporte)
-    const soloLectura = (idUsuario !== idVigilado);
+    const soloLectura = (historico && historico == 'true' || idUsuario !== idVigilado);
     //const anioVigencia = await TblAnioVigencias.query().where('anv_estado', true).orderBy('anv_id', 'desc').select('anv_anio').first()
-  //  const reporte = await TblReporte.query().where({ 'id_encuesta': 2, 'login_vigilado': idVigilado, 'anio_vigencia': anioVigencia?.anio! }).first();
-   /*  if (!reporte) {
-      return {
-        estado: false,
-        codigo: 400,
-        mensaje: "No se encontro una planeación para este usuario",
-      }
-    } */
+    //  const reporte = await TblReporte.query().where({ 'id_encuesta': 2, 'login_vigilado': idVigilado, 'anio_vigencia': anioVigencia?.anio! }).first();
+    /*  if (!reporte) {
+       return {
+         estado: false,
+         codigo: 400,
+         mensaje: "No se encontro una planeación para este usuario",
+       }
+     } */
     const consulta = TblFormulariosIndicadores.query()
     const vigencia = reporte?.anioVigencia ?? undefined
     consulta.preload('subIndicadores', subIndicador => {
@@ -437,7 +437,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       formulario.subIndicadores.forEach(subInd => {
         // const preguntas: any = []
         subInd.datosIndicadores.forEach(datos => {
-         
+
           actividades.push({
             nombre: subInd.nombre,
             datoId: datos.id,
@@ -482,7 +482,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       const evidencias: any = [];
       formulario.adicionales.forEach(adicional => {
         adicional.datosAdicionales.forEach(datoAdicional => {
-         // console.log(datoAdicional.detalleAdicional);         
+          // console.log(datoAdicional.detalleAdicional);         
           evidencias.push({
             idAdicional: datoAdicional.id,
             pregunta: adicional.nombre,
@@ -514,7 +514,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       })
 
       formularios.push({
-        nombre: "Ejecución",        
+        nombre: "Ejecución",
         // mensaje,
         adicionales: evidencias,
         actividades,
@@ -659,40 +659,40 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
               faltantesAdicionales.push(adicional.idAdicional);
               aprobado = false;
             }
-            if ((adicional.respuesta && adicional.respuesta !== '') && (adicional.tieneObservacion && adicional.tieneObservacion == true)) {           
-              console.log("habilitaObservacion: ",adicional.habilitaObservacion);
-              
+            if ((adicional.respuesta && adicional.respuesta !== '') && (adicional.tieneObservacion && adicional.tieneObservacion == true)) {
+              console.log("habilitaObservacion: ", adicional.habilitaObservacion);
+
               const datoClave = adicional.habilitaObservacion!;
               const arr = Object.values(datoClave);
-              if(arr.length !== 0){            
-               arr.forEach(dato => {
-                 
-                if(adicional.respuesta === dato && (!adicional.observacion || adicional.observacion === '')){
-                  faltantesAdicionales.push(adicional.idAdicional);
-                  aprobado = false;
-                }
-                 
-               });
+              if (arr.length !== 0) {
+                arr.forEach(dato => {
+
+                  if (adicional.respuesta === dato && (!adicional.observacion || adicional.observacion === '')) {
+                    faltantesAdicionales.push(adicional.idAdicional);
+                    aprobado = false;
+                  }
+
+                });
               }
-              
-              
-               
-              
-             }
+
+
+
+
+            }
           }
         });
 
       }
     });
 
-     if (aprobado) {
-       this.servicioEstado.Log(idUsuario, 1007, reportes?.idEncuesta)
-       const reporte = await TblReporte.findOrFail(idReporte)
-       reporte.fechaEnviostEjecucion = DateTime.fromJSDate(new Date())
-       reporte.envioStEjecucion = '1'
-       reporte.estadoVerificacionId = 1007
-       reporte.save();
-     }
+    if (aprobado) {
+      this.servicioEstado.Log(idUsuario, 1007, reportes?.idEncuesta)
+      const reporte = await TblReporte.findOrFail(idReporte)
+      reporte.fechaEnviostEjecucion = DateTime.fromJSDate(new Date())
+      reporte.envioStEjecucion = '1'
+      reporte.estadoVerificacionId = 1007
+      reporte.save();
+    }
 
     //return indicadores
     return { aprobado, faltantesActividades, faltantesAdicionales }

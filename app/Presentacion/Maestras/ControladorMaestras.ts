@@ -1,6 +1,8 @@
 /* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import { TblAnioVigencias } from 'App/Infraestructura/Datos/Entidad/AnioVigencia';
+import { TblMeses } from 'App/Infraestructura/Datos/Entidad/Mes';
 
 export default class ControladorReporte {
   //private service: ServicioIndicadores
@@ -13,45 +15,29 @@ export default class ControladorReporte {
 
   public async listarMeses ({ request, response }:HttpContextContract) {
 
-     response.status(200).send({
-      "meses": [{
-        idMes : 1,
-        nombreMes:"Enero"
-      },{
-        idMes : 2,
-        nombreMes:"Febrero"
-      },{
-        idMes : 3,
-        nombreMes:"Marzo"
-      },{
-        idMes : 4,
-        nombreMes:"Abril"
-      },{
-        idMes : 5,
-        nombreMes:"Mayo"
-      },{
-        idMes : 6,
-        nombreMes:"Junio"
-      },{
-        idMes : 7,
-        nombreMes:"Julio"
-      },{
-        idMes : 8,
-        nombreMes:"Agosto"
-      },{
-        idMes : 9,
-        nombreMes:"Septiembre"
-      },{
-        idMes : 10,
-        nombreMes:"Octubre"
-      },{
-        idMes : 11,
-        nombreMes:"Noviembre"
-      },{
-        idMes : 12,
-        nombreMes:"Diciembre"
-      }]
-  }) 
+    const { historico } = request.only(['historico']);
+    
+    let mesesSql;
+    
+    if (historico && historico == 'true') {
+      const vigencia = await TblAnioVigencias.query().where('anv_estado', true).first();
+      if (vigencia?.anio == 2023) {
+        mesesSql = await TblMeses.query().where('mes_habilitado', true).orderBy('mes_id', 'asc');
+      } else {
+        mesesSql = await TblMeses.query().orderBy('mes_id', 'asc');
+      }
+    } else {
+      mesesSql = await TblMeses.query().where('mes_estado', true).orderBy('mes_id', 'asc');
+    }
+
+
+   const meses = mesesSql.map(m =>{
+    return {
+      idMes : m.id,
+      nombreMes:m.nombre
+    }
+   })
+    response.status(200).send({ meses })
   }
 
 
