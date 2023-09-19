@@ -460,8 +460,8 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
             documento: datos.detalleDatos[0]?.documento ?? '',
             nombreOriginal: datos.detalleDatos[0]?.nombredocOriginal ?? '',
             ruta: datos.detalleDatos[0]?.ruta ?? '',
-            adjuntable: false,
-            adjuntableObligatorio: false,
+            adjuntable: subInd.adjuntable,
+            adjuntableObligatorio: subInd.adjuntableObligatorio,
             tipoPregunta: "NUMBER",
             validacionesPregunta: {
               tipoDato: subInd.periodo.tipo,
@@ -654,6 +654,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
               faltantesActividades.push(actividad.datoId);
               aprobado = false;
             }
+
           }
         });
       }
