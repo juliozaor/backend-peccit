@@ -112,7 +112,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
           preguntas.push({
             datoId: datos.id,
             // pregunta: datos.nombre,
-            obligatoria: subInd.obligatorio,
+            
             respuesta: datos.detalleDatos[0]?.valor ?? '',
             /*   tipoDeEvidencia: "",
               documento: "",
@@ -137,6 +137,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
         if (preguntas.length >= 1) {
           subIndicador.push({
             nombre: subInd.nombre,
+            obligatoria: subInd.obligatorio,
             //  codigo: subInd.codigo,            
             meses: preguntas,
           })
