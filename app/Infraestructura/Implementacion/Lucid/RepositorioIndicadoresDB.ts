@@ -112,7 +112,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
           preguntas.push({
             datoId: datos.id,
             // pregunta: datos.nombre,
-            obligatoria: subInd.obligatorio,
+            
             respuesta: datos.detalleDatos[0]?.valor ?? '',
             /*   tipoDeEvidencia: "",
               documento: "",
@@ -137,6 +137,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
         if (preguntas.length >= 1) {
           subIndicador.push({
             nombre: subInd.nombre,
+            obligatoria: subInd.obligatorio,
             //  codigo: subInd.codigo,            
             meses: preguntas,
           })
@@ -203,8 +204,8 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       if (formulario.actividades.length != 0) {
         formulario.actividades.forEach(actividad => {
           if (actividad.meses.length != 0) {
-            actividad.meses.forEach(mes => {
-              if (mes.obligatoria) {
+            actividad.meses.forEach(mes => {              
+              if (actividad.obligatoria) {
                 if (!mes.respuesta || mes.respuesta === '') {
 
                   faltantesActividades.push(mes.datoId);
