@@ -191,6 +191,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
   async enviarSt(params: any): Promise<any> {
     const { idReporte, idVigilado, idUsuario } = params
     let aprobado = true;
+    let objetivos = true;
     const faltantesActividades = new Array();
     const faltantesEvidencias = new Array();
 
@@ -229,6 +230,14 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
       }
     });
+    //Verificar objetivos
+    const objetivosUsuario = await TblObjetivos.query().where('obj_usuario_id',idUsuario).first();
+
+if(!objetivosUsuario ){
+  aprobado=false ;
+  objetivos = false;
+}
+
 
     if (aprobado) {
       this.servicioEstado.Log(idUsuario, 1009, reportes?.idEncuesta)
@@ -240,7 +249,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     }
 
     //return indicadores
-    return { aprobado, faltantesActividades, faltantesEvidencias }
+    return { aprobado, faltantesActividades, faltantesEvidencias, objetivos}
 
   }
 
