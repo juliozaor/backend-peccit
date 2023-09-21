@@ -26,8 +26,8 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     const formularios: any = [];
     const reporte = await TblReporte.findOrFail(idReporte)
     const { planeacionEditable } = await this.servicioAcciones.obtenerAccion(reporte?.estadoVerificacionId ?? 0, idRol);
-   
-    const soloLectura = (idUsuario !== idVigilado || !planeacionEditable)??false;
+
+    const soloLectura = (idUsuario !== idVigilado || !planeacionEditable) ?? false;
     const consulta = TblFormulariosIndicadores.query()
     const vigencia = reporte.anioVigencia ?? undefined
     const usuario = await TblUsuarios.query().preload('objetivos', sqlObj => {
@@ -43,6 +43,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
             detalle.where('ddt_reporte_id', idReporte)
           })
           datos.where('dai_visible', true)
+          datos.orderBy('dai_orden', 'asc')
         })
 
 
@@ -50,8 +51,8 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
         subIndicador.preload('datosIndicadores', datos => {
           datos.preload('detalleDatos', detalle => {
             detalle.where('ddt_reporte_id', idReporte)
-          })
-
+          });
+          datos.orderBy('dai_orden', 'asc')
         })
 
 
@@ -84,6 +85,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
           sqlSubTipoDato.preload('tipoDato')
         })
       }
+      sqlEvidencia.orderBy('evi_orden', 'asc')
     })
 
 
@@ -97,9 +99,12 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       const subIndicador: any = [];
       const cabeceras: any = [];
       let contador = 0;
-      formulario.subIndicadores.forEach(subInd => {
+      formulario.subIndicadores.forEach(async subInd => {
         const preguntas: any = []
         contador += 1;
+       /*  for await (const datos of  subInd.datosIndicadores) {
+          
+        } */
         subInd.datosIndicadores.forEach(datos => {
           if (contador == 1) {
             cabeceras.push(datos.nombre)
@@ -128,6 +133,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
               observacionCorresponde: "" */
           })
         });
+       // }
         if (preguntas.length >= 1) {
           subIndicador.push({
             nombre: subInd.nombre,
@@ -185,6 +191,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
   async enviarSt(params: any): Promise<any> {
     const { idReporte, idVigilado, idUsuario } = params
     let aprobado = true;
+    let objetivos = true;
     const faltantesActividades = new Array();
     const faltantesEvidencias = new Array();
 
@@ -223,6 +230,14 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
       }
     });
+    //Verificar objetivos
+    const objetivosUsuario = await TblObjetivos.query().where('obj_usuario_id',idUsuario).first();
+
+if(!objetivosUsuario ){
+  aprobado=false ;
+  objetivos = false;
+}
+
 
     if (aprobado) {
       this.servicioEstado.Log(idUsuario, 1009, reportes?.idEncuesta)
@@ -234,7 +249,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     }
 
     //return indicadores
-    return { aprobado, faltantesActividades, faltantesEvidencias }
+    return { aprobado, faltantesActividades, faltantesEvidencias, objetivos}
 
   }
 
@@ -246,9 +261,9 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
     this.servicioEstado.Log(documento, 1008, idEncuesta, reporteId)
 
-    if (objetivos.length >= 1) {
-      await TblObjetivos.query().where('obj_usuario_id', documento).delete();
-    }
+
+    await TblObjetivos.query().where('obj_usuario_id', documento).delete();
+
     for await (const objetivo of objetivos) {
       const objetivoDB = {
         nombre: objetivo,
@@ -356,8 +371,8 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     const reporte = await TblReporte.findOrFail(idReporte)
     const { ejecucionEditable } = await this.servicioAcciones.obtenerAccion(reporte?.estadoVerificacionId ?? 0, idRol);
 
-    
-    const soloLectura = (historico && historico == 'true' || idUsuario !== idVigilado || !ejecucionEditable)??false;
+
+    const soloLectura = (historico && historico == 'true' || idUsuario !== idVigilado || !ejecucionEditable) ?? false;
     //const anioVigencia = await TblAnioVigencias.query().where('anv_estado', true).orderBy('anv_id', 'desc').select('anv_anio').first()
     //  const reporte = await TblReporte.query().where({ 'id_encuesta': 2, 'login_vigilado': idVigilado, 'anio_vigencia': anioVigencia?.anio! }).first();
     /*  if (!reporte) {
