@@ -686,9 +686,11 @@ if(!objetivosUsuario ){
               faltantesAdicionales.push(adicional.idAdicional);
               aprobado = false;
             }
-            if ((adicional.respuesta && adicional.respuesta !== '' ) && (adicional.tieneObservacion && adicional.tieneObservacion == true)) {
-              console.log("habilitaObservacion: ", adicional.habilitaObservacion);
+           
 
+            
+            if (adicional.respuesta && adicional.respuesta !== '' ) {
+            if(adicional.tieneObservacion && adicional.tieneObservacion == true){
               const datoClave = adicional.habilitaObservacion!;
               const arr = Object.values(datoClave);
               if (arr.length !== 0) {
@@ -701,11 +703,17 @@ if(!objetivosUsuario ){
 
                 });
               }
-
-
-
-
             }
+            
+            if(adicional.adjuntable && adicional.adjuntableObligatorio && adicional.respuesta !== '0' 
+            && adicional.documento === ''){
+              faltantesAdicionales.push(adicional.idAdicional);
+              aprobado = false;
+            }
+            } //final si
+
+
+
           }
         });
 
