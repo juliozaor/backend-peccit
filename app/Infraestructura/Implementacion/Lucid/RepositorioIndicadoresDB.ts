@@ -445,6 +445,7 @@ if(!objetivosUsuario ){
         })
       }
       sqlAdicional.preload('tipoPregunta');
+      sqlAdicional.orderBy('adi_orden', 'asc');
     })
 
 
