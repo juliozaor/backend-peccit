@@ -508,6 +508,8 @@ if(!objetivosUsuario ){
           evidencias.push({
             idAdicional: datoAdicional.id,
             pregunta: adicional.nombre,
+            maxCaracteres: adicional.maxCaracteres,
+            mensaje: adicional.tipoEvidencia,
             obligatoria: adicional.obligatorio,
             respuesta: datoAdicional.detalleAdicional[0]?.valor ?? '',
             documento: datoAdicional.detalleAdicional[0]?.documento ?? '',
@@ -667,7 +669,9 @@ if(!objetivosUsuario ){
       if (formulario.actividades.length != 0) {
         formulario.actividades.forEach(actividad => {
           if (actividad.obligatoria) {
-            if ((!actividad.respuesta || actividad.respuesta === '') || (actividad.adjuntableObligatorio && actividad.documento === '')) {
+            if ((!actividad.respuesta || actividad.respuesta === '') || 
+            (actividad.adjuntableObligatorio && actividad.documento === '')
+            && actividad.respuesta !== '0') {
               faltantesActividades.push(actividad.datoId);
               aprobado = false;
             }
@@ -682,7 +686,7 @@ if(!objetivosUsuario ){
               faltantesAdicionales.push(adicional.idAdicional);
               aprobado = false;
             }
-            if ((adicional.respuesta && adicional.respuesta !== '') && (adicional.tieneObservacion && adicional.tieneObservacion == true)) {
+            if ((adicional.respuesta && adicional.respuesta !== '' ) && (adicional.tieneObservacion && adicional.tieneObservacion == true)) {
               console.log("habilitaObservacion: ", adicional.habilitaObservacion);
 
               const datoClave = adicional.habilitaObservacion!;
