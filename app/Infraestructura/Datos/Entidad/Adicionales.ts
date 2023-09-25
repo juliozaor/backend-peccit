@@ -20,6 +20,7 @@ export class TblAdicionales extends BaseModel {
   @column({ columnName: 'adi_tipo_pregunta_id' }) public tipoPreguntaId: number;
   @column({ columnName: 'adi_estado' }) public estado: boolean;
   @column({ columnName: 'adi_formulario_id' }) public formularioId: number;
+  @column({ columnName: 'adi_max_caracteres' }) public maxCaracteres: number;
 
   @belongsTo(() => TblTiposPregunta, {
     localKey: 'id',
