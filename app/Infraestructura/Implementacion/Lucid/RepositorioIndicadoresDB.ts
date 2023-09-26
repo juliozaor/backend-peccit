@@ -287,8 +287,7 @@ if(!objetivosUsuario ){
         valor: respuesta.valor,
         reporteId: reporteId,
         fechaActualizacion: DateTime.fromJSDate(new Date),
-        anioActivoId: anioVigencia ?? 2023,
-        observacion: respuesta.observacion ?? ''
+        anioActivoId: anioVigencia ?? 2023
       }
 
       if (respuesta.documento) {
