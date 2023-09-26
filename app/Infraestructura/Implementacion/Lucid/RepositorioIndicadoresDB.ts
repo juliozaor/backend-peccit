@@ -287,7 +287,8 @@ if(!objetivosUsuario ){
         valor: respuesta.valor,
         reporteId: reporteId,
         fechaActualizacion: DateTime.fromJSDate(new Date),
-        anioActivoId: anioVigencia ?? 2023
+        anioActivoId: anioVigencia ?? 2023,
+        observacion: respuesta.observacion ?? ''
       }
 
       if (respuesta.documento) {
@@ -299,9 +300,7 @@ if(!objetivosUsuario ){
       if (respuesta.ruta) {
         data.ruta = respuesta.ruta
       }
-      if (respuesta.observacion) {
-        data.observacion = respuesta.observacion
-      }
+    
 
       if (existeDatos) {
         existeDatos.estableceDetalleDatosConId(data)
@@ -571,7 +570,8 @@ if(!objetivosUsuario ){
         valorEjecutado: respuesta.valor,
         reporteId: reporteId,
         fechaActualizacion: DateTime.fromJSDate(new Date),
-        anioActivoId: anioVigencia ?? 2023
+        anioActivoId: anioVigencia ?? 2023,
+        observacion: respuesta.observacion ?? ''
       }
 
       if (respuesta.documento) {
@@ -583,9 +583,7 @@ if(!objetivosUsuario ){
       if (respuesta.ruta) {
         data.ruta = respuesta.ruta
       }
-      /*  if (respuesta.observacion) {
-         data.observacion = respuesta.observacion
-       } */
+  
 
       if (existeDatos) {
         existeDatos.estableceDetalleDatosConId(data)
