@@ -55,7 +55,8 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
         valor: respuesta.valor,
         usuarioActualizacion: documento,
         idReporte: idReporte,
-        fechaActualizacion: DateTime.fromJSDate(new Date)
+        fechaActualizacion: DateTime.fromJSDate(new Date),
+        observacion:respuesta.observacion
       }
 
       if (respuesta.documento) {
@@ -67,10 +68,10 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
       if (respuesta.ruta) {
         data.ruta = respuesta.ruta
       }
-      if (respuesta.observacion) {
+      /* if (respuesta.observacion) {
         data.observacion = respuesta.observacion
       }
-
+ */
 
       if (existeRespuesta) {
         existeRespuesta.estableceRespuestaConId(data)
