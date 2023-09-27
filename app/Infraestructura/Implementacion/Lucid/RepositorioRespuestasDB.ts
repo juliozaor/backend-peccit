@@ -56,7 +56,7 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
         usuarioActualizacion: documento,
         idReporte: idReporte,
         fechaActualizacion: DateTime.fromJSDate(new Date),
-        observacion:respuesta.observacion
+        observacion: respuesta.observacion ?? ''
       }
 
       if (respuesta.documento) {
