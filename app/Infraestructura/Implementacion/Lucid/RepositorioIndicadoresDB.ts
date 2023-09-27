@@ -564,14 +564,18 @@ if(!objetivosUsuario ){
 
       const existeDatos = await TblDetalleDatos.query().where({ 'ddt_dato_indicador_id': respuesta.preguntaId, 'ddt_reporte_id': reporteId }).first()
 
+      
       let data: DetalleDatos = {
         datoIndicadorId: respuesta.preguntaId,
         valorEjecutado: respuesta.valor,
         reporteId: reporteId,
         fechaActualizacion: DateTime.fromJSDate(new Date),
         anioActivoId: anioVigencia ?? 2023,
-        observacion: respuesta.observacion ?? ''
+        observacion: respuesta.observacion ?? '',
+        
       }
+
+
 
       if (respuesta.documento) {
         data.documento = respuesta.documento
@@ -606,7 +610,8 @@ if(!objetivosUsuario ){
         reporteId: reporteId,
         valor: adicional.valor,
         fechaActualizacion: DateTime.fromJSDate(new Date),
-        anioActivoId: anioVigencia ?? 2023
+        anioActivoId: anioVigencia ?? 2023,
+        observacion: adicional.observacion ?? ''
       }
 
       if (adicional.documento) {
