@@ -7,6 +7,7 @@ import TblEncuestas from 'App/Infraestructura/Datos/Entidad/Encuesta';
 import TblEstadoVigilado from './EstadoVigilado';
 import { TblObjetivos } from './Objetivos';
 import { TblSedesOperativas } from './SedesOperativas';
+import { TblPatios } from './Patios';
 
 export default class TblUsuarios extends BaseModel {
   @column({ isPrimary: true, columnName: 'usn_id' })
@@ -145,5 +146,11 @@ export default class TblUsuarios extends BaseModel {
     foreignKey:'usuarioId'
   })
   public sedesOperativas: HasMany<typeof TblSedesOperativas> 
+
+  @hasMany(()=> TblPatios, {
+    localKey: 'identificacion',
+    foreignKey:'usuarioId'
+  })
+  public patios: HasMany<typeof TblPatios> 
 
 }
