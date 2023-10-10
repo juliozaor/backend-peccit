@@ -10,13 +10,14 @@ import { PayloadJWT } from 'App/Dominio/Dto/PayloadJWT';
 import { ServicioEstadosVerificado } from 'App/Dominio/Datos/Servicios/ServicioEstadosVerificado';
 import TblUsuarios from 'App/Infraestructura/Datos/Entidad/Usuario';
 import { TblSedesOperativas } from 'App/Infraestructura/Datos/Entidad/SedesOperativas';
+import { TblPatios } from 'App/Infraestructura/Datos/Entidad/Patios';
 export class RepositorioRespuestasDB implements RepositorioRespuesta {
   private servicioAuditoria = new ServicioAuditoria();
   private servicioEstado = new ServicioEstados();
   private servicioEstadoVerificado = new ServicioEstadosVerificado()
 
   async guardar(datos: string, idReporte: number, documento: string): Promise<any> {
-    const { respuestas, sedes } = JSON.parse(datos);
+    const { respuestas, sedes, guardarPatios, eliminarPatios } = JSON.parse(datos);
     const { usuarioCreacion, loginVigilado, idEncuesta, estadoVerificacionId } = await TblReporte.findByOrFail('id', idReporte)
     let estado = 1003
     if (estadoVerificacionId === 7 || estadoVerificacionId === 1005) {
@@ -44,7 +45,25 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
        sedesOperativas.estableceSedeConId(sede);
        sedesOperativas.save();
     }
+    
 
+    await TblPatios.query().whereIn('pat_id', eliminarPatios).delete();
+
+    for await (const patio of guardarPatios) {
+      if(patio.id){
+        const isPatio = await TblPatios.findOrFail(patio.id);
+        isPatio.establecePatioConId(patio)
+        isPatio.save()
+        
+      }else{
+        patio.usuarioId = patio.usuario_id       
+        
+        const newPatio = new TblPatios()
+        newPatio.establecePatio(patio)
+        newPatio.save()
+
+      }
+    }
 
     for await (const respuesta of respuestas) {
       //validar si existe

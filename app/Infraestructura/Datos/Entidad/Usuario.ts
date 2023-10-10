@@ -8,6 +8,7 @@ import TblEstadoVigilado from './EstadoVigilado';
 import { TblObjetivos } from './Objetivos';
 import { TblSedesOperativas } from './SedesOperativas';
 import { TblPatios } from './Patios';
+import { TblEmpresas } from './Empresas';
 
 export default class TblUsuarios extends BaseModel {
   @column({ isPrimary: true, columnName: 'usn_id' })
@@ -152,5 +153,11 @@ export default class TblUsuarios extends BaseModel {
     foreignKey:'usuarioId'
   })
   public patios: HasMany<typeof TblPatios> 
+
+  @hasMany(()=> TblEmpresas, {
+    localKey: 'identificacion',
+    foreignKey:'usuarioId'
+  })
+  public empresas: HasMany<typeof TblEmpresas>
 
 }

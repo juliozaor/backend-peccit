@@ -31,7 +31,6 @@ export class TblPatios extends BaseModel {
     this.telefono = patio.telefono
     this.correo = patio.correo
     this.estado = patio.estado
-    this.usuarioId = patio.usuarioId
   }
 
   public establecePatio(patio: Patio) {

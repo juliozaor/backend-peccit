@@ -172,7 +172,8 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
     const usuario = await TblUsuarios.query().preload('clasificacionUsuario', (sqlClasC) => {
       sqlClasC.preload('clasificacion')
       sqlClasC.has('clasificacion')
-    }).preload('sedesOperativas').preload('patios').where('identificacion', idVigilado).first()
+    }).preload('sedesOperativas').preload('patios').preload('empresas').where('identificacion', idVigilado).first()
+console.log(usuario);
 
     const nombreClasificaion = usuario?.clasificacionUsuario[0]?.nombre;
     const descripcionClasificacion = usuario?.clasificacionUsuario[0]?.descripcion;
@@ -255,6 +256,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
       // observacion: encuestaSql?.observacion,
       patios:usuario?.patios,
       sedes: usuario?.sedesOperativas,
+      empresas:usuario?.empresas,
       clasificaciones: clasificacionesArr,
 
     }
