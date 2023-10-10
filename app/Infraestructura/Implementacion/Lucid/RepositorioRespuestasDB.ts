@@ -11,13 +11,14 @@ import { ServicioEstadosVerificado } from 'App/Dominio/Datos/Servicios/ServicioE
 import TblUsuarios from 'App/Infraestructura/Datos/Entidad/Usuario';
 import { TblSedesOperativas } from 'App/Infraestructura/Datos/Entidad/SedesOperativas';
 import { TblPatios } from 'App/Infraestructura/Datos/Entidad/Patios';
+import { TblEmpresas } from 'App/Infraestructura/Datos/Entidad/Empresas';
 export class RepositorioRespuestasDB implements RepositorioRespuesta {
   private servicioAuditoria = new ServicioAuditoria();
   private servicioEstado = new ServicioEstados();
   private servicioEstadoVerificado = new ServicioEstadosVerificado()
 
   async guardar(datos: string, idReporte: number, documento: string): Promise<any> {
-    const { respuestas, sedes, guardarPatios, eliminarPatios } = JSON.parse(datos);
+    const { respuestas, sedes, guardarPatios, eliminarPatios, guardarEmpresas, eliminarEmpresas } = JSON.parse(datos);
     const { usuarioCreacion, loginVigilado, idEncuesta, estadoVerificacionId } = await TblReporte.findByOrFail('id', idReporte)
     let estado = 1003
     if (estadoVerificacionId === 7 || estadoVerificacionId === 1005) {
@@ -64,6 +65,62 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
       }
     }
+
+    await TblEmpresas.query().whereIn('emp_nit', eliminarEmpresas).delete();
+
+    for await (const empresa of guardarEmpresas) {
+      const datosEmpresa= {
+        nit: empresa.nit,
+        razonSocial: empresa.razon_social,
+        tipoServicio: empresa.tipo_servicio,
+        originalTipoServicio: empresa.original_tipo_servicio,
+        documentoTipoServicio: empresa.documento_tipo_servicio,
+        rutaTipoServicio: empresa.ruta_tipo_servicio,
+        capacidadTransportadoraA: empresa.capacidad_transportadora_a,
+        capacidadTransportadoraB: empresa.capacidad_transportadora_b,
+        capacidadTransportadoraC: empresa.capacidad_transportadora_c,
+        originalTransportadora: empresa.original_transportadora,
+        rutaTransportadora: empresa.ruta_transportadora,
+        documentoTransportadora: empresa.documento_transportadora,
+        originalPlaca: empresa.original_placa,
+        rutaPlaca: empresa.ruta_placa,
+        documentoPlaca: empresa.documento_placa,
+        estado: empresa.estado,
+        usuarioId: empresa.usuario_id,
+      }
+   
+      
+          
+        const isEmpresa = await TblEmpresas.findBy('emp_nit',empresa.nit);
+        
+        if (isEmpresa) {
+          const affectedRows = await TblEmpresas.query()
+          .where('emp_nit', empresa.nit)
+          .update(datosEmpresa);
+          
+     } else {
+     const a = await TblEmpresas.create(datosEmpresa);   
+     /*  const newEmpresa = new TblEmpresas()
+      newEmpresa.estableceEmpresa(datosEmpresa)
+      newEmpresa.save()
+       */
+     }
+
+    /*   if(isEmpresa){
+
+        isEmpresa.estableceEmpresaConId(datosEmpresa)
+        isEmpresa.save()
+        
+      }else{        
+      console.log("Entro 4");
+
+        const newEmpresa = new TblEmpresas()
+        newEmpresa.estableceEmpresa(datosEmpresa)
+        newEmpresa.save()
+
+      } */
+    }
+
 
     for await (const respuesta of respuestas) {
       //validar si existe

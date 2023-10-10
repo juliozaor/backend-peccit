@@ -173,8 +173,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
       sqlClasC.preload('clasificacion')
       sqlClasC.has('clasificacion')
     }).preload('sedesOperativas').preload('patios').preload('empresas').where('identificacion', idVigilado).first()
-console.log(usuario);
-
+ 
     const nombreClasificaion = usuario?.clasificacionUsuario[0]?.nombre;
     const descripcionClasificacion = usuario?.clasificacionUsuario[0]?.descripcion;
     const pasos = usuario?.clasificacionUsuario[0]?.clasificacion
@@ -254,9 +253,9 @@ console.log(usuario);
       clasificaion: nombreClasificaion,
       descripcionClasificacion,
       // observacion: encuestaSql?.observacion,
-      patios:usuario?.patios,
+      patios: usuario?.patios,
       sedes: usuario?.sedesOperativas,
-      empresas:usuario?.empresas,
+      empresas: usuario?.empresas,
       clasificaciones: clasificacionesArr,
 
     }
@@ -283,7 +282,7 @@ console.log(usuario);
       const respuesta = respuestas.find(r => r.idPregunta === pregunta.id)
       const datoClave = pregunta.tiposPregunta.datoClave;
       if (pregunta.padre) {
-       
+
         //  const preguntaPadre = preguntas.find(p => p.id == pregunta.padre);
         const respuestaPadre = respuestas.find(r => r.idPregunta === pregunta.padre)
 
@@ -293,7 +292,7 @@ console.log(usuario);
             arrRespuesta.forEach(dato => {
               if (respuestaPadre?.valor === dato) {
                 repuestaExiste = this.validarRespuesta(respuesta, pregunta, datoClave);
-               
+
               }
 
             });
@@ -305,7 +304,7 @@ console.log(usuario);
       } else {
         repuestaExiste = this.validarRespuesta(respuesta, pregunta, datoClave);
       }
-      
+
 
       if (!repuestaExiste) {
         aprobado = false
@@ -325,13 +324,13 @@ console.log(usuario);
 
     if (confirmar) aprobado = true;
 
-//Verificar sedes
-const sedesOperativas = await TblSedesOperativas.query().where('seo_usuario_id',idUsuario ).first();
+    //Verificar sedes
+    const sedesOperativas = await TblSedesOperativas.query().where('seo_usuario_id', idUsuario).first();
 
-if(!sedesOperativas ){
-  aprobado=false ;
-  sedes = false;
-}
+    if (!sedesOperativas) {
+      aprobado = false;
+      sedes = false;
+    }
 
 
 
@@ -389,7 +388,7 @@ if(!sedesOperativas ){
     return true
   }
 
-  validarRespuesta = (respuesta: any, pregunta: any, datoClave:any): boolean => {
+  validarRespuesta = (respuesta: any, pregunta: any, datoClave: any): boolean => {
 
     let validacion = true
     if (pregunta.obligatoria) {
@@ -398,19 +397,19 @@ if(!sedesOperativas ){
         validacion = false
       }
       if (respuesta && respuesta.valor === '') {
-        validacion =  false
+        validacion = false
       }
       if ((respuesta && respuesta.valor !== '') && (pregunta.tieneObservacion && pregunta.tieneObservacion === true)) {
         //const datoClave = pregunta.tiposPregunta.datoClave!;
-       
+
         const arr = Object.values(datoClave);
         if (arr.length !== 0) {
           arr.forEach(dato => {
-            
+
             if (respuesta.valor === dato && (!respuesta.observacion || respuesta.observacion === '')) {
-                
-             
-              validacion =  false              
+
+
+              validacion = false
             }
 
           });

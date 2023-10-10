@@ -2,6 +2,8 @@ import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
 import { Empresa } from 'App/Dominio/Datos/Entidades/Empresa';
 export class TblEmpresas extends BaseModel {
 
+  @column({ columnName: 'emp_id' })
+  public id: number;
   @column({ columnName: 'emp_nit' })
   public nit: number;
   @column({ columnName: 'emp_razon_social' })
