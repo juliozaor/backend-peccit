@@ -3,22 +3,23 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { TblAnioVigencias } from 'App/Infraestructura/Datos/Entidad/AnioVigencia';
 import { TblMeses } from 'App/Infraestructura/Datos/Entidad/Mes';
+import { TblServiciosModalidades } from 'App/Infraestructura/Datos/Entidad/ServicioModalidad';
 
 export default class ControladorReporte {
   //private service: ServicioIndicadores
-  constructor () {
+  constructor() {
     /* this.service = new ServicioIndicadores(
       new RepositorioIndicadoresDB()
     ) */
   }
 
 
-  public async listarMeses ({ request, response }:HttpContextContract) {
+  public async listarMeses({ request, response }: HttpContextContract) {
 
     const { historico } = request.only(['historico']);
-    
+
     let mesesSql;
-    
+
     if (historico && historico == 'true') {
       const vigencia = await TblAnioVigencias.query().where('anv_estado', true).first();
       if (vigencia?.anio == 2023) {
@@ -31,16 +32,19 @@ export default class ControladorReporte {
     }
 
 
-   const meses = mesesSql.map(m =>{
-    return {
-      idMes : m.id,
-      nombreMes:m.nombre
-    }
-   })
+    const meses = mesesSql.map(m => {
+      return {
+        idMes: m.id,
+        nombreMes: m.nombre
+      }
+    })
     response.status(200).send({ meses })
   }
 
-
+  public async servicioModalidad({ request, response }: HttpContextContract) {
+    const serviciosModalidades = await TblServiciosModalidades.all();
+    response.status(200).send({ serviciosModalidades })
+  }
 
 
 }
