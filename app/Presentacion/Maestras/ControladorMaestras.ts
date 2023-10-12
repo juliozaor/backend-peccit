@@ -2,6 +2,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { TblAnioVigencias } from 'App/Infraestructura/Datos/Entidad/AnioVigencia';
+import { TblCiudades } from 'App/Infraestructura/Datos/Entidad/Ciudades';
+import { TblDepartamentos } from 'App/Infraestructura/Datos/Entidad/Departamentos';
 import { TblMeses } from 'App/Infraestructura/Datos/Entidad/Mes';
 import { TblServiciosModalidades } from 'App/Infraestructura/Datos/Entidad/ServicioModalidad';
 
@@ -44,6 +46,23 @@ export default class ControladorReporte {
   public async servicioModalidad({ request, response }: HttpContextContract) {
     const serviciosModalidades = await TblServiciosModalidades.all();
     response.status(200).send({ serviciosModalidades })
+  }
+
+  public async listarDepartamentos({ request, response }: HttpContextContract) {
+    const departamentos = await TblDepartamentos.query().where('status',true);
+    response.status(200).send( departamentos )
+  }
+
+  public async listarCiudades({ request, response }: HttpContextContract) {
+    const {departamentoId} = request.all();
+    let ciudades;
+    if(departamentoId){
+      ciudades = await TblCiudades.query().preload('departamento').where({'departmentId': departamentoId,'status':true});
+      
+    }else{
+      ciudades=await TblCiudades.query().preload('departamento').where('status',true);
+    }
+    response.status(200).send( ciudades )
   }
 
 
