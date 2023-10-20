@@ -44,12 +44,12 @@ export default class ControladorReporte {
   }
 
   public async servicioModalidad({ request, response }: HttpContextContract) {
-    const serviciosModalidades = await TblServiciosModalidades.all();
+    const serviciosModalidades = await TblServiciosModalidades.query().orderBy('id', 'asc');
     response.status(200).send({ serviciosModalidades })
   }
 
   public async listarDepartamentos({ request, response }: HttpContextContract) {
-    const departamentos = await TblDepartamentos.query().where('status',true);
+    const departamentos = await TblDepartamentos.query().where('status',true).orderBy('name', 'asc');
     response.status(200).send( departamentos )
   }
 
@@ -57,10 +57,11 @@ export default class ControladorReporte {
     const {departamentoId} = request.all();
     let ciudades;
     if(departamentoId){
-      ciudades = await TblCiudades.query().preload('departamento').where({'departmentId': departamentoId,'status':true});
+      ciudades = await TblCiudades.query().preload('departamento')
+      .where({'departmentId': departamentoId,'status':true}).orderBy('name', 'asc');
       
     }else{
-      ciudades=await TblCiudades.query().preload('departamento').where('status',true);
+      ciudades=await TblCiudades.query().preload('departamento').where('status',true).orderBy('name', 'asc');
     }
     response.status(200).send( ciudades )
   }
