@@ -1,8 +1,8 @@
 export class Patio {
   id?: number;
   nombre: string;
-  departamento: string;
-  municipio: string;
+  departamento: number;
+  municipio: number;
   direccion: string;
   encargado: string;
   telefono: string;

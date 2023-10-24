@@ -6,9 +6,9 @@ export class TblPatios extends BaseModel {
   @column({ columnName: 'pat_nombre' })
   public nombre: string;
   @column({ columnName: 'pat_departamento' })
-  public departamento: string;
+  public departamento: number;
   @column({ columnName: 'pat_municipio' })
-  public municipio: string;
+  public municipio: number;
   @column({ columnName: 'pat_direccion' })
   public direccion: string;
   @column({ columnName: 'pat_encargado' })

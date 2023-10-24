@@ -11,8 +11,8 @@ export class Empresa {
   originalTransportadora: string;
   rutaTransportadora: string;
   documentoTransportadora: string;
-  departamento: string;
-  municipio: string;
+  departamento: number;
+  municipio: number;
   estado: boolean;
   usuarioId:string;
 }

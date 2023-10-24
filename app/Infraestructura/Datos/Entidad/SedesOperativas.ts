@@ -8,9 +8,9 @@ export class TblSedesOperativas extends BaseModel {
   @column({ columnName: 'seo_nombre' })
   public nombre: string; 
   @column({ columnName: 'seo_departamento' })
-  public departamento: string; 
+  public departamento: number; 
   @column({ columnName: 'seo_municipio' })
-  public municipio: string; 
+  public municipio: number; 
   @column({ columnName: 'seo_estado' })
   public estado: boolean; 
   @column({ columnName: 'seo_encargado' })

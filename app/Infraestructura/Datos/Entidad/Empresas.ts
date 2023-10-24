@@ -31,9 +31,9 @@ export class TblEmpresas extends BaseModel {
   @column({ columnName: 'emp_usuario_id' })
   public usuarioId: string;
   @column({ columnName: 'emp_departamento' })
-  public departamento: string; 
+  public departamento: number; 
   @column({ columnName: 'emp_municipio' })
-  public municipio: string; 
+  public municipio: number; 
   @column({ columnName: 'emp_estado' })
   public estado: boolean;
 
