@@ -13,12 +13,21 @@ export class TblSedesOperativas extends BaseModel {
   public municipio: string; 
   @column({ columnName: 'seo_estado' })
   public estado: boolean; 
+  @column({ columnName: 'seo_encargado' })
+  public encargado: string;
+  @column({ columnName: 'seo_telefono' })
+  public telefono: string;
+  @column({ columnName: 'seo_correo' })
+  public correo: string;
 
   public estableceSedeConId (sede: Sede) {
     this.nombre = sede.nombre
     this.usuarioId = sede.usuarioId
     this.departamento = sede.departamento
     this.municipio = sede.municipio
+    this.encargado = sede.encargado
+    this.telefono = sede.telefono
+    this.correo = sede.correo
   }
 
 

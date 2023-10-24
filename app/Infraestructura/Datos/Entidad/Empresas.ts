@@ -27,13 +27,7 @@ export class TblEmpresas extends BaseModel {
   @column({ columnName: 'emp_ruta_transportadora' })
   public rutaTransportadora: string;
   @column({ columnName: 'emp_documento_transportadora' })
-  public documentoTransportadora: string;
-  @column({ columnName: 'emp_original_placa' })
-  public originalPlaca: string;
-  @column({ columnName: 'emp_ruta_placa' })
-  public rutaPlaca: string;
-  @column({ columnName: 'emp_documento_placa' })
-  public documentoPlaca: string;
+  public documentoTransportadora: string;  
   @column({ columnName: 'emp_usuario_id' })
   public usuarioId: string;
   @column({ columnName: 'emp_estado' })
@@ -52,9 +46,6 @@ export class TblEmpresas extends BaseModel {
     this.originalTransportadora = empresa.originalTransportadora
     this.rutaTransportadora = empresa.rutaTransportadora
     this.documentoTransportadora = empresa.documentoTransportadora
-    this.originalPlaca = empresa.originalPlaca
-    this.rutaPlaca = empresa.rutaPlaca
-    this.documentoPlaca = empresa.documentoPlaca
     this.estado = empresa.estado
   }
 
@@ -71,9 +62,6 @@ export class TblEmpresas extends BaseModel {
     this.originalTransportadora = empresa.originalTransportadora
     this.rutaTransportadora = empresa.rutaTransportadora
     this.documentoTransportadora = empresa.documentoTransportadora
-    this.originalPlaca = empresa.originalPlaca
-    this.rutaPlaca = empresa.rutaPlaca
-    this.documentoPlaca = empresa.documentoPlaca
     this.estado = empresa.estado
     this.usuarioId = empresa.usuarioId
   }

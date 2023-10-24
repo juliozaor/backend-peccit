@@ -12,6 +12,12 @@ export class RespuestaInicioSesion {
       apellido?: string,
       telefono?: string,
       correo?: string,
+      departamentoId?: number,
+      nombreDepartamento?: string,
+      municipioId?: number,
+      nombreCiudad?: string,
+      esDepartamental?: number
+      abrirModal?: boolean,
     },
     public readonly token: string,
     public readonly rol: RolDto,

@@ -4,4 +4,7 @@ export class Sede {
   departamento: string;
   municipio: string;
   usuarioId: string;
+  encargado: string;
+  telefono: string;
+  correo: string;
 }

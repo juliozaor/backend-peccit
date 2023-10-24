@@ -11,9 +11,6 @@ export class Empresa {
   originalTransportadora: string;
   rutaTransportadora: string;
   documentoTransportadora: string;
-  originalPlaca: string;
-  rutaPlaca: string;
-  documentoPlaca: string;  
   estado: boolean;
   usuarioId:string;
 }

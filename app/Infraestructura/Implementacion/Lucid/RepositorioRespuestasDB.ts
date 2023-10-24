@@ -82,9 +82,6 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
         originalTransportadora: empresa.original_transportadora,
         rutaTransportadora: empresa.ruta_transportadora,
         documentoTransportadora: empresa.documento_transportadora,
-        originalPlaca: empresa.original_placa,
-        rutaPlaca: empresa.ruta_placa,
-        documentoPlaca: empresa.documento_placa,
         estado: empresa.estado,
         usuarioId: empresa.usuario_id,
       }

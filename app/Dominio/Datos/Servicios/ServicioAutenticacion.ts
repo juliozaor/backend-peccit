@@ -79,7 +79,7 @@ export class ServicioAutenticacion {
     })
 
     this.servicioEstado.Log(usuario, 1010)
-    
+
     if (usuarioVerificado.idRol === '003') {
       this.servicioEstado.Log(usuarioVerificado.identificacion, 1001)
     }
@@ -93,6 +93,8 @@ export class ServicioAutenticacion {
       descripcion: 'Inicio de sesión'
     })
 
+    console.log(usuarioVerificado);
+
     return new RespuestaInicioSesion(
       {
         id: usuarioVerificado.id,
@@ -100,7 +102,13 @@ export class ServicioAutenticacion {
         nombre: usuarioVerificado.nombre,
         apellido: usuarioVerificado.apellido,
         telefono: usuarioVerificado.telefono,
-        correo: usuarioVerificado.correo
+        correo: usuarioVerificado.correo,
+        departamentoId: usuarioVerificado.departamentoId,
+        nombreDepartamento: usuarioVerificado.nombreDepartamento,
+        municipioId: usuarioVerificado.municipioId,
+        nombreCiudad: usuarioVerificado.nombreCiudad,
+        esDepartamental: usuarioVerificado.esDepartamental,
+        abrirModal: usuarioVerificado.abrirModal,
       },
       token,
       new RolDto(rolUsuario),

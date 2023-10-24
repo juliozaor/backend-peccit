@@ -58,9 +58,14 @@ if(params.termino){
   }
 
   async obtenerUsuarioPorUsuario (nombreUsuario: string): Promise<Usuario | null>{
-    const usuario = await TblUsuarios.query().where('usuario', '=', nombreUsuario).first()
-    if(usuario){
-      return usuario.obtenerUsuario()
+    const usuarioDb = await TblUsuarios.query().where('usuario', '=', nombreUsuario)
+    .preload('departamentos')
+    .preload('ciudades').first()
+    if(usuarioDb){
+      const usuario = usuarioDb.obtenerUsuario()
+      usuario.nombreDepartamento = usuarioDb.departamentos.name
+      usuario.nombreCiudad = usuarioDb.ciudades.name
+      return usuario
     }
     return null
   }
