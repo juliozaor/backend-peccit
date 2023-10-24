@@ -84,6 +84,8 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
         documentoTransportadora: empresa.documento_transportadora,
         estado: empresa.estado,
         usuarioId: empresa.usuario_id,
+        departamento: empresa.departamento,
+        municipio: empresa.municipio,
       }
    
       
