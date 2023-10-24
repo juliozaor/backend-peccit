@@ -30,8 +30,13 @@ export class TblEmpresas extends BaseModel {
   public documentoTransportadora: string;  
   @column({ columnName: 'emp_usuario_id' })
   public usuarioId: string;
+  @column({ columnName: 'emp_departamento' })
+  public departamento: string; 
+  @column({ columnName: 'emp_municipio' })
+  public municipio: string; 
   @column({ columnName: 'emp_estado' })
   public estado: boolean;
+
 
 
   public estableceEmpresaConId(empresa: Empresa) {
@@ -46,6 +51,8 @@ export class TblEmpresas extends BaseModel {
     this.originalTransportadora = empresa.originalTransportadora
     this.rutaTransportadora = empresa.rutaTransportadora
     this.documentoTransportadora = empresa.documentoTransportadora
+    this.departamento = empresa.departamento
+    this.municipio = empresa.municipio
     this.estado = empresa.estado
   }
 
@@ -62,6 +69,8 @@ export class TblEmpresas extends BaseModel {
     this.originalTransportadora = empresa.originalTransportadora
     this.rutaTransportadora = empresa.rutaTransportadora
     this.documentoTransportadora = empresa.documentoTransportadora
+    this.departamento = empresa.departamento
+    this.municipio = empresa.municipio
     this.estado = empresa.estado
     this.usuarioId = empresa.usuarioId
   }
