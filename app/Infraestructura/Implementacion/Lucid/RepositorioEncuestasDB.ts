@@ -22,6 +22,7 @@ import Env from '@ioc:Adonis/Core/Env';
 import { EnviadorEmailAdonis } from 'App/Infraestructura/Email/EnviadorEmailAdonis';
 import Preguntas from 'App/Infraestructura/Datos/Entidad/Pregunta';
 import { TblSedesOperativas } from 'App/Infraestructura/Datos/Entidad/SedesOperativas';
+import { TblEmpresas } from 'App/Infraestructura/Datos/Entidad/Empresas';
 export class RepositorioEncuestasDB implements RepositorioEncuesta {
   private servicioAuditoria = new ServicioAuditoria();
   private servicioEstado = new ServicioEstados();
@@ -268,6 +269,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
     const usuario = await TblUsuarios.query().where('identificacion', idUsuario).first()
 
     let aprobado = true;
+    let tieneEmpresa = true;
     let sedes = true;
     const faltantes = new Array();
     //  const pasos = usuario?.clasificacionUsuario[0]?.clasificacion
@@ -324,6 +326,13 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
 
     if (confirmar) aprobado = true;
 
+     //verificar empresas
+  const empresas = TblEmpresas.query().where('emp_usuario_id', idUsuario).first();  
+  if(!empresas){
+    aprobado = false;
+    tieneEmpresa = false;
+  }
+
     //Verificar sedes
     const sedesOperativas = await TblSedesOperativas.query().where('seo_usuario_id', idUsuario).first();
 
@@ -376,7 +385,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
 
     }
 
-    return { aprobado, faltantes, sedes }
+    return { aprobado, faltantes, sedes,tieneEmpresa }
 
   }
 
