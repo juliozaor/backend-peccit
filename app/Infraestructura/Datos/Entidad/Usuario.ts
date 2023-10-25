@@ -48,6 +48,8 @@ export default class TblUsuarios extends BaseModel {
 
   @column({ columnName: 'modal' }) public abrirModal?: boolean
 
+  @column({ columnName: 'reporta_otro_municipio' }) public reportaOtroMunicipio?: boolean
+
   @column.dateTime({ autoCreate: true, columnName: 'usn_creacion' }) public createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'usn_actualizacion' }) public updatedAt: DateTime
@@ -70,6 +72,7 @@ export default class TblUsuarios extends BaseModel {
     this.municipioId = usuario.municipioId
     this.esDepartamental = usuario.esDepartamental
     this.abrirModal = usuario.abrirModal
+    this.reportaOtroMunicipio = usuario.reportaOtroMunicipio
   }
 
   public estableceUsuarioConId(usuario: Usuario) {
@@ -89,6 +92,12 @@ export default class TblUsuarios extends BaseModel {
     this.municipioId = usuario.municipioId
     this.esDepartamental = usuario.esDepartamental
     this.abrirModal = usuario.abrirModal
+    this.reportaOtroMunicipio = usuario.reportaOtroMunicipio
+  }
+
+  public actualizarRespuesta(respuesta: boolean) {    
+    this.reportaOtroMunicipio = respuesta
+    this.abrirModal = false
   }
 
   public obtenerUsuario(): Usuario {
@@ -110,6 +119,7 @@ export default class TblUsuarios extends BaseModel {
     usuario.municipioId = this.municipioId 
     usuario.esDepartamental = this.esDepartamental 
     usuario.abrirModal = this.abrirModal 
+    usuario.reportaOtroMunicipio = this.reportaOtroMunicipio 
 
     return usuario
   }

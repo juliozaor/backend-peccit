@@ -19,4 +19,5 @@ export class Usuario{
   nombreCiudad?: string;  
   esDepartamental?: number;
   abrirModal?:boolean;
+  reportaOtroMunicipio?:boolean;
 }

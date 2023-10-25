@@ -8,7 +8,7 @@ export default class extends BaseSchema {
       table.increments('rmu_id')
       table.integer('rmu_departamento')
       table.integer('rmu_municipio')
-      table.integer('rmu_usuario')
+      table.string('rmu_usuario')
       table.string('rmu_convenio')
       table.text('rmu_nombre_original')
       table.string('rmu_ruta')

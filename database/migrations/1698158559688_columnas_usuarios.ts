@@ -9,6 +9,7 @@ export default class extends BaseSchema {
       table.integer('municipio_id').defaultTo(167)
       table.integer('es_departamental').defaultTo(0)
       table.boolean('modal').defaultTo(false)
+      table.boolean('reporta_otro_municipio').defaultTo(false)
     })
   }
 
@@ -18,6 +19,7 @@ export default class extends BaseSchema {
       table.dropColumn('municipio_id')
       table.dropColumn('es_departamental')
       table.dropColumn('modal')
+      table.dropColumn('reporta_otro_municipio')
     })
   }
 }

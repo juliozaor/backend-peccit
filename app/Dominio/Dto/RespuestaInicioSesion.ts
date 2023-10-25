@@ -18,6 +18,7 @@ export class RespuestaInicioSesion {
       nombreCiudad?: string,
       esDepartamental?: number
       abrirModal?: boolean,
+      reportaOtroMunicipio?: boolean,
     },
     public readonly token: string,
     public readonly rol: RolDto,

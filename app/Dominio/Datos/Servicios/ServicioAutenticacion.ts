@@ -93,7 +93,6 @@ export class ServicioAutenticacion {
       descripcion: 'Inicio de sesión'
     })
 
-    console.log(usuarioVerificado);
 
     return new RespuestaInicioSesion(
       {
@@ -109,6 +108,7 @@ export class ServicioAutenticacion {
         nombreCiudad: usuarioVerificado.nombreCiudad,
         esDepartamental: usuarioVerificado.esDepartamental,
         abrirModal: usuarioVerificado.abrirModal,
+        reportaOtroMunicipio: usuarioVerificado.reportaOtroMunicipio,
       },
       token,
       new RolDto(rolUsuario),
