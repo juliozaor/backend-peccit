@@ -7,10 +7,6 @@ export class ServicioOtrosMunicipios {
     return this.repositorio.obtener(idUsuario);
   }
 
-  async validar(idUsuario: string): Promise<any> {
-    return this.repositorio.validar(idUsuario);
-  }
-
   async crear( idUsuario: string, datos: string): Promise<any> {
     return this.repositorio.crear(idUsuario, datos );
   }
