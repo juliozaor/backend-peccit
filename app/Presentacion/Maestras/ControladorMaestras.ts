@@ -6,6 +6,7 @@ import { TblCiudades } from 'App/Infraestructura/Datos/Entidad/Ciudades';
 import { TblDepartamentos } from 'App/Infraestructura/Datos/Entidad/Departamentos';
 import { TblMeses } from 'App/Infraestructura/Datos/Entidad/Mes';
 import { TblServiciosModalidades } from 'App/Infraestructura/Datos/Entidad/ServicioModalidad';
+import TblUsuarios from 'App/Infraestructura/Datos/Entidad/Usuario';
 
 export default class ControladorReporte {
   //private service: ServicioIndicadores
@@ -49,21 +50,25 @@ export default class ControladorReporte {
   }
 
   public async listarDepartamentos({ request, response }: HttpContextContract) {
-    const departamentos = await TblDepartamentos.query().where('status',true).orderBy('name', 'asc');
-    response.status(200).send( departamentos )
+    const departamentos = await TblDepartamentos.query().where('status', true).orderBy('name', 'asc');
+    response.status(200).send(departamentos)
   }
 
   public async listarCiudades({ request, response }: HttpContextContract) {
-    const {departamentoId} = request.all();
-    let ciudades;
-    if(departamentoId){
-      ciudades = await TblCiudades.query().preload('departamento')
-      .where({'departmentId': departamentoId,'status':true}).orderBy('name', 'asc');
-      
-    }else{
+    const { departamentoId, filtro } = request.all();
+    const consulta = TblCiudades.query().preload('departamento').where('status', true);
+    if (departamentoId) {
+      consulta.where('departmentId', departamentoId);
+    }/* else{
       ciudades=await TblCiudades.query().preload('departamento').where('status',true).orderBy('name', 'asc');
+    } */
+    if(filtro && filtro == 'true'){
+      const payload = await request.obtenerPayloadJWT();
+      const usuario = await TblUsuarios.findByOrFail('usn_usuario', payload.documento);
+      consulta.where('id', usuario.municipioId!)
     }
-    response.status(200).send( ciudades )
+    const ciudades = await consulta.orderBy('name', 'asc');
+    response.status(200).send(ciudades)
   }
 
 
