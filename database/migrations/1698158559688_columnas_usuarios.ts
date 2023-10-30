@@ -5,8 +5,8 @@ export default class extends BaseSchema {
 
   public async up () {
     this.schema.alterTable(this.tableName, (table) => {
-      table.integer('departamento_id').defaultTo(5)
-      table.integer('municipio_id').defaultTo(167)
+      table.integer('departamento_id')
+      table.integer('municipio_id')
       table.integer('es_departamental').defaultTo(0)
       table.boolean('modal').defaultTo(false)
       table.boolean('reporta_otro_municipio').defaultTo(false)
