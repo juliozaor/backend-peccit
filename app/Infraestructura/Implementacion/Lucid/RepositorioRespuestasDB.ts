@@ -10,13 +10,15 @@ import { PayloadJWT } from 'App/Dominio/Dto/PayloadJWT';
 import { ServicioEstadosVerificado } from 'App/Dominio/Datos/Servicios/ServicioEstadosVerificado';
 import TblUsuarios from 'App/Infraestructura/Datos/Entidad/Usuario';
 import { TblSedesOperativas } from 'App/Infraestructura/Datos/Entidad/SedesOperativas';
+import { TblPatios } from 'App/Infraestructura/Datos/Entidad/Patios';
+import { TblEmpresas } from 'App/Infraestructura/Datos/Entidad/Empresas';
 export class RepositorioRespuestasDB implements RepositorioRespuesta {
   private servicioAuditoria = new ServicioAuditoria();
   private servicioEstado = new ServicioEstados();
   private servicioEstadoVerificado = new ServicioEstadosVerificado()
 
   async guardar(datos: string, idReporte: number, documento: string): Promise<any> {
-    const { respuestas, sedes } = JSON.parse(datos);
+    const { respuestas, sedes, guardarPatios, eliminarPatios, guardarEmpresas, eliminarEmpresas } = JSON.parse(datos);
     const { usuarioCreacion, loginVigilado, idEncuesta, estadoVerificacionId } = await TblReporte.findByOrFail('id', idReporte)
     let estado = 1003
     if (estadoVerificacionId === 7 || estadoVerificacionId === 1005) {
@@ -43,6 +45,79 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
       const sedesOperativas = new TblSedesOperativas();
        sedesOperativas.estableceSedeConId(sede);
        sedesOperativas.save();
+    }
+    
+
+    await TblPatios.query().whereIn('pat_id', eliminarPatios).delete();
+
+    for await (const patio of guardarPatios) {
+      if(patio.id){
+        const isPatio = await TblPatios.findOrFail(patio.id);
+        isPatio.establecePatioConId(patio)
+        isPatio.save()
+        
+      }else{
+        patio.usuarioId = patio.usuario_id       
+        
+        const newPatio = new TblPatios()
+        newPatio.establecePatio(patio)
+        newPatio.save()
+
+      }
+    }
+
+    await TblEmpresas.query().whereIn('emp_nit', eliminarEmpresas).delete();
+
+    for await (const empresa of guardarEmpresas) {
+      const datosEmpresa= {
+        nit: empresa.nit,
+        razonSocial: empresa.razon_social,
+        tipoServicio: empresa.tipo_servicio,
+        originalTipoServicio: empresa.original_tipo_servicio,
+        documentoTipoServicio: empresa.documento_tipo_servicio,
+        rutaTipoServicio: empresa.ruta_tipo_servicio,
+        capacidadTransportadoraA: empresa.capacidad_transportadora_a,
+        capacidadTransportadoraB: empresa.capacidad_transportadora_b,
+        capacidadTransportadoraC: empresa.capacidad_transportadora_c,
+        originalTransportadora: empresa.original_transportadora,
+        rutaTransportadora: empresa.ruta_transportadora,
+        documentoTransportadora: empresa.documento_transportadora,
+        estado: empresa.estado,
+        usuarioId: empresa.usuario_id,
+        departamento: empresa.departamento,
+        municipio: empresa.municipio,
+      }
+   
+      
+          
+        const isEmpresa = await TblEmpresas.findBy('emp_nit',empresa.nit);
+        
+        if (isEmpresa) {
+          const affectedRows = await TblEmpresas.query()
+          .where('emp_nit', empresa.nit)
+          .update(datosEmpresa);
+          
+     } else {
+     const a = await TblEmpresas.create(datosEmpresa);   
+     /*  const newEmpresa = new TblEmpresas()
+      newEmpresa.estableceEmpresa(datosEmpresa)
+      newEmpresa.save()
+       */
+     }
+
+    /*   if(isEmpresa){
+
+        isEmpresa.estableceEmpresaConId(datosEmpresa)
+        isEmpresa.save()
+        
+      }else{        
+      console.log("Entro 4");
+
+        const newEmpresa = new TblEmpresas()
+        newEmpresa.estableceEmpresa(datosEmpresa)
+        newEmpresa.save()
+
+      } */
     }
 
 

@@ -1,10 +1,12 @@
-export class Sede {
+export class Patio {
   id?: number;
   nombre: string;
   departamento: number;
   municipio: number;
-  usuarioId: string;
+  direccion: string;
   encargado: string;
   telefono: string;
   correo: string;
+  estado: boolean;
+  usuarioId: string;
 }

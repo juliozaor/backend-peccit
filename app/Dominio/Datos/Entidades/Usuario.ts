@@ -13,4 +13,11 @@ export class Usuario{
   clave: string;
   claveTemporal: boolean;
   idRol: string;
+  departamentoId?: number;
+  nombreDepartamento?: string;
+  municipioId?: number;
+  nombreCiudad?: string;  
+  esDepartamental?: number;
+  abrirModal?:boolean;
+  reportaOtroMunicipio?:boolean;
 }

@@ -22,6 +22,7 @@ import Env from '@ioc:Adonis/Core/Env';
 import { EnviadorEmailAdonis } from 'App/Infraestructura/Email/EnviadorEmailAdonis';
 import Preguntas from 'App/Infraestructura/Datos/Entidad/Pregunta';
 import { TblSedesOperativas } from 'App/Infraestructura/Datos/Entidad/SedesOperativas';
+import { TblEmpresas } from 'App/Infraestructura/Datos/Entidad/Empresas';
 export class RepositorioEncuestasDB implements RepositorioEncuesta {
   private servicioAuditoria = new ServicioAuditoria();
   private servicioEstado = new ServicioEstados();
@@ -172,8 +173,8 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
     const usuario = await TblUsuarios.query().preload('clasificacionUsuario', (sqlClasC) => {
       sqlClasC.preload('clasificacion')
       sqlClasC.has('clasificacion')
-    }).preload('sedesOperativas').where('identificacion', idVigilado).first()
-
+    }).preload('sedesOperativas').preload('patios').preload('empresas').where('identificacion', idVigilado).first()
+ 
     const nombreClasificaion = usuario?.clasificacionUsuario[0]?.nombre;
     const descripcionClasificacion = usuario?.clasificacionUsuario[0]?.descripcion;
     const pasos = usuario?.clasificacionUsuario[0]?.clasificacion
@@ -253,7 +254,9 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
       clasificaion: nombreClasificaion,
       descripcionClasificacion,
       // observacion: encuestaSql?.observacion,
+      patios: usuario?.patios,
       sedes: usuario?.sedesOperativas,
+      empresas: usuario?.empresas,
       clasificaciones: clasificacionesArr,
 
     }
@@ -266,6 +269,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
     const usuario = await TblUsuarios.query().where('identificacion', idUsuario).first()
 
     let aprobado = true;
+    let tieneEmpresa = true;
     let sedes = true;
     const faltantes = new Array();
     //  const pasos = usuario?.clasificacionUsuario[0]?.clasificacion
@@ -280,7 +284,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
       const respuesta = respuestas.find(r => r.idPregunta === pregunta.id)
       const datoClave = pregunta.tiposPregunta.datoClave;
       if (pregunta.padre) {
-       
+
         //  const preguntaPadre = preguntas.find(p => p.id == pregunta.padre);
         const respuestaPadre = respuestas.find(r => r.idPregunta === pregunta.padre)
 
@@ -290,7 +294,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
             arrRespuesta.forEach(dato => {
               if (respuestaPadre?.valor === dato) {
                 repuestaExiste = this.validarRespuesta(respuesta, pregunta, datoClave);
-               
+
               }
 
             });
@@ -302,7 +306,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
       } else {
         repuestaExiste = this.validarRespuesta(respuesta, pregunta, datoClave);
       }
-      
+
 
       if (!repuestaExiste) {
         aprobado = false
@@ -322,13 +326,20 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
 
     if (confirmar) aprobado = true;
 
-//Verificar sedes
-const sedesOperativas = await TblSedesOperativas.query().where('seo_usuario_id',idUsuario ).first();
+     //verificar empresas
+  const empresas = TblEmpresas.query().where('emp_usuario_id', idUsuario).first();  
+  if(!empresas){
+    aprobado = false;
+    tieneEmpresa = false;
+  }
 
-if(!sedesOperativas ){
-  aprobado=false ;
-  sedes = false;
-}
+    //Verificar sedes
+    const sedesOperativas = await TblSedesOperativas.query().where('seo_usuario_id', idUsuario).first();
+
+    if (!sedesOperativas) {
+      aprobado = false;
+      sedes = false;
+    }
 
 
 
@@ -374,7 +385,7 @@ if(!sedesOperativas ){
 
     }
 
-    return { aprobado, faltantes, sedes }
+    return { aprobado, faltantes, sedes,tieneEmpresa }
 
   }
 
@@ -386,7 +397,7 @@ if(!sedesOperativas ){
     return true
   }
 
-  validarRespuesta = (respuesta: any, pregunta: any, datoClave:any): boolean => {
+  validarRespuesta = (respuesta: any, pregunta: any, datoClave: any): boolean => {
 
     let validacion = true
     if (pregunta.obligatoria) {
@@ -395,19 +406,19 @@ if(!sedesOperativas ){
         validacion = false
       }
       if (respuesta && respuesta.valor === '') {
-        validacion =  false
+        validacion = false
       }
       if ((respuesta && respuesta.valor !== '') && (pregunta.tieneObservacion && pregunta.tieneObservacion === true)) {
         //const datoClave = pregunta.tiposPregunta.datoClave!;
-       
+
         const arr = Object.values(datoClave);
         if (arr.length !== 0) {
           arr.forEach(dato => {
-            
+
             if (respuesta.valor === dato && (!respuesta.observacion || respuesta.observacion === '')) {
-                
-             
-              validacion =  false              
+
+
+              validacion = false
             }
 
           });

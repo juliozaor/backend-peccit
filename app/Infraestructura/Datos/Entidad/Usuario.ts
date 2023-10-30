@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { BaseModel, BelongsTo, HasMany, HasOne, ManyToMany, belongsTo, column, hasMany, hasOne, manyToMany} from '@ioc:Adonis/Lucid/Orm';
+import { BaseModel, BelongsTo, HasMany, HasOne, ManyToMany, belongsTo, column, hasMany, hasOne, manyToMany } from '@ioc:Adonis/Lucid/Orm';
 import { Usuario } from 'App/Dominio/Datos/Entidades/Usuario';
 import TblRoles from './Autorizacion/Rol';
 import TblClasificaciones from './Clasificaciones';
@@ -7,6 +7,10 @@ import TblEncuestas from 'App/Infraestructura/Datos/Entidad/Encuesta';
 import TblEstadoVigilado from './EstadoVigilado';
 import { TblObjetivos } from './Objetivos';
 import { TblSedesOperativas } from './SedesOperativas';
+import { TblPatios } from './Patios';
+import { TblEmpresas } from './Empresas';
+import { TblDepartamentos } from './Departamentos';
+import { TblCiudades } from './Ciudades';
 
 export default class TblUsuarios extends BaseModel {
   @column({ isPrimary: true, columnName: 'usn_id' })
@@ -36,11 +40,21 @@ export default class TblUsuarios extends BaseModel {
 
   @column({ columnName: 'usn_rol_id' }) public idRol: string
 
-  @column.dateTime({ autoCreate: true , columnName: 'usn_creacion'}) public createdAt: DateTime
+  @column({ columnName: 'departamento_id' }) public departamentoId?: number
+
+  @column({ columnName: 'municipio_id' }) public municipioId?: number
+
+  @column({ columnName: 'es_departamental' }) public esDepartamental?: number
+
+  @column({ columnName: 'modal' }) public abrirModal?: boolean
+
+  @column({ columnName: 'reporta_otro_municipio' }) public reportaOtroMunicipio?: boolean
+
+  @column.dateTime({ autoCreate: true, columnName: 'usn_creacion' }) public createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'usn_actualizacion' }) public updatedAt: DateTime
 
-  public establecerUsuarioDb (usuario: Usuario) {
+  public establecerUsuarioDb(usuario: Usuario) {
     this.id = usuario.id
     this.nombre = usuario.nombre
     this.usuario = usuario.usuario
@@ -54,9 +68,14 @@ export default class TblUsuarios extends BaseModel {
     this.identificacion = usuario.identificacion
     this.estado = usuario.estado
     this.idRol = usuario.idRol
+    this.departamentoId = usuario.departamentoId
+    this.municipioId = usuario.municipioId
+    this.esDepartamental = usuario.esDepartamental
+    this.abrirModal = usuario.abrirModal
+    this.reportaOtroMunicipio = usuario.reportaOtroMunicipio
   }
 
-  public estableceUsuarioConId (usuario: Usuario) {
+  public estableceUsuarioConId(usuario: Usuario) {
     this.nombre = usuario.nombre
     this.usuario = usuario.usuario
     this.clave = usuario.clave
@@ -69,9 +88,19 @@ export default class TblUsuarios extends BaseModel {
     this.identificacion = usuario.identificacion
     this.estado = usuario.estado
     this.idRol = usuario.idRol
+    this.departamentoId = usuario.departamentoId
+    this.municipioId = usuario.municipioId
+    this.esDepartamental = usuario.esDepartamental
+    this.abrirModal = usuario.abrirModal
+    this.reportaOtroMunicipio = usuario.reportaOtroMunicipio
   }
 
-  public obtenerUsuario (): Usuario {
+  public actualizarRespuesta(respuesta: boolean) {    
+    this.reportaOtroMunicipio = respuesta
+    this.abrirModal = false
+  }
+
+  public obtenerUsuario(): Usuario {
     const usuario = new Usuario()
     usuario.id = this.id
     usuario.nombre = this.nombre
@@ -86,6 +115,11 @@ export default class TblUsuarios extends BaseModel {
     usuario.fechaNacimiento = this.fechaNacimiento
     usuario.telefono = this.telefono
     usuario.idRol = this.idRol
+    usuario.departamentoId = this.departamentoId 
+    usuario.municipioId = this.municipioId 
+    usuario.esDepartamental = this.esDepartamental 
+    usuario.abrirModal = this.abrirModal 
+    usuario.reportaOtroMunicipio = this.reportaOtroMunicipio 
 
     return usuario
   }
@@ -96,54 +130,73 @@ export default class TblUsuarios extends BaseModel {
   })
   public rol: BelongsTo<typeof TblRoles>
 
- 
+
   @manyToMany(() => TblClasificaciones, {
     localKey: 'id',
     pivotForeignKey: 'clu_usuario_id',
     relatedKey: 'id',
-    pivotRelatedForeignKey: 'clu_clasificacion_id', 
-    pivotColumns: ['clu_vehiculos','clu_conductores'],
+    pivotRelatedForeignKey: 'clu_clasificacion_id',
+    pivotColumns: ['clu_vehiculos', 'clu_conductores'],
     pivotTable: 'tbl_clasificacion_usuarios'
   })
   public clasificacionUsuario: ManyToMany<typeof TblClasificaciones>
 
-  /* @hasMany(()=> TblUsuarioEncuesta, {
+  @manyToMany(() => TblEncuestas, {
     localKey: 'identificacion',
-    foreignKey:'nitVigilado'
-  })
-  public usuarioEncuesta: HasMany<typeof TblUsuarioEncuesta> */
-
-  @manyToMany(()=> TblEncuestas, {
-    localKey: 'identificacion',
-    pivotForeignKey:'use_nitVigilado',
+    pivotForeignKey: 'use_nitVigilado',
     relatedKey: 'id',
-    pivotRelatedForeignKey: 'use_idEncuesta', 
+    pivotRelatedForeignKey: 'use_idEncuesta',
     pivotColumns: ['use_creacion', 'use_estado_vigilado_id'],
     pivotTable: 'tbl_usuarios_encuestas'
   })
   public usuarioEncuesta: ManyToMany<typeof TblEncuestas>
 
 
-  @manyToMany(()=> TblEstadoVigilado, {
+  @manyToMany(() => TblEstadoVigilado, {
     localKey: 'identificacion',
-    pivotForeignKey:'use_nitVigilado',
+    pivotForeignKey: 'use_nitVigilado',
     relatedKey: 'id',
-    pivotRelatedForeignKey: 'use_estado_vigilado_id', 
+    pivotRelatedForeignKey: 'use_estado_vigilado_id',
     //pivotColumns: ['use_estado_vigilado_id'],
     pivotTable: 'tbl_usuarios_encuestas'
   })
   public usuarioEstadoVigilado: ManyToMany<typeof TblEstadoVigilado>
 
-   @hasMany(()=> TblObjetivos, {
+  @hasMany(() => TblObjetivos, {
     localKey: 'identificacion',
-    foreignKey:'usuarioId'
+    foreignKey: 'usuarioId'
   })
-  public objetivos: HasMany<typeof TblObjetivos> 
+  public objetivos: HasMany<typeof TblObjetivos>
 
-  @hasMany(()=> TblSedesOperativas, {
+  @hasMany(() => TblSedesOperativas, {
     localKey: 'identificacion',
-    foreignKey:'usuarioId'
+    foreignKey: 'usuarioId'
   })
-  public sedesOperativas: HasMany<typeof TblSedesOperativas> 
+  public sedesOperativas: HasMany<typeof TblSedesOperativas>
+
+  @hasMany(() => TblPatios, {
+    localKey: 'identificacion',
+    foreignKey: 'usuarioId'
+  })
+  public patios: HasMany<typeof TblPatios>
+
+  @hasMany(() => TblEmpresas, {
+    localKey: 'identificacion',
+    foreignKey: 'usuarioId'
+  })
+  public empresas: HasMany<typeof TblEmpresas>
+
+  @belongsTo(() => TblDepartamentos, {
+    localKey: 'id',
+    foreignKey: 'departamentoId',
+  })
+  public departamentos: BelongsTo<typeof TblDepartamentos>
+
+
+  @belongsTo(() => TblCiudades, {
+    localKey: 'id',
+    foreignKey: 'municipioId'
+  })
+  public ciudades: BelongsTo<typeof TblCiudades>
 
 }
