@@ -324,7 +324,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
 
     // });
 
-    if (confirmar) aprobado = true;
+  
 
      //verificar empresas
   const empresas = await TblEmpresas.query().where('emp_usuario_id', idUsuario).first();  
@@ -342,7 +342,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
       sedes = false;
     }
 
-
+    if (confirmar) aprobado = true;
 
     if (aprobado) {
       this.servicioEstado.Log(idUsuario, 1004, reportes?.idEncuesta, undefined, confirmar)

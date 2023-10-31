@@ -27,11 +27,16 @@ export default class ControladorEncuesta {
 
   public async enviarSt ({ request, response }:HttpContextContract) {
     const payload = await request.obtenerPayloadJWT()
-    const enviado = await this.service.enviarSt(request.all(), payload)
-    if(enviado && !enviado.aprobado){
-    return response.status(400). send(enviado)
+    try {
+      const enviado = await this.service.enviarSt(request.all(), payload)
+      return enviado
+      
+    } catch (error) {
+      return response.status(400).send("se presento un error en el servidor")
     }
-    return enviado
+   /*  if(enviado && !enviado.aprobado){
+    return response.status(200). send(enviado)
+    } */
   }
 
   public async motivos () {
