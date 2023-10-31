@@ -64,8 +64,15 @@ export default class ControladorReporte {
     } */
     if(filtro && filtro == 'true'){
       const payload = await request.obtenerPayloadJWT();
-      const usuario = await TblUsuarios.findByOrFail('usn_usuario', payload.documento);
-      consulta.where('id', usuario.municipioId!)
+      //const usuario = await TblUsuarios.findByOrFail('usn_usuario', payload.documento);
+      const usuario = await TblUsuarios.query().preload('reportaMunicipio').where('usn_usuario', payload.documento).first();
+      const idMunicipios = new Array();
+     // consulta.where('id', usuario.municipioId!)
+     usuario?.reportaMunicipio.forEach(elemento => {      
+      idMunicipios.push(elemento.municipio);
+     });     
+      consulta.whereIn('id', idMunicipios)
+
     }
     const ciudades = await consulta.orderBy('name', 'asc');
     response.status(200).send(ciudades)

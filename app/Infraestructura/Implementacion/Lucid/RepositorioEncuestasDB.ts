@@ -327,7 +327,8 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
     if (confirmar) aprobado = true;
 
      //verificar empresas
-  const empresas = TblEmpresas.query().where('emp_usuario_id', idUsuario).first();  
+  const empresas = await TblEmpresas.query().where('emp_usuario_id', idUsuario).first();  
+  
   if(!empresas){
     aprobado = false;
     tieneEmpresa = false;
