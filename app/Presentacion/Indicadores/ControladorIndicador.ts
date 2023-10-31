@@ -35,16 +35,11 @@ export default class ControladorReporte {
   public async enviar({ request, response }: HttpContextContract) {
     
     const payload = await request.obtenerPayloadJWT()
-    try {
-      const enviado = await this.service.enviarSt(request.all(), payload)
-      return enviado
-      
-    } catch (error) {
-      return response.status(400).send("Se presento un error en el servidor")
-      
+    const enviado = await this.service.enviarSt(request.all(), payload)
+    if (enviado && !enviado.aprobado) {
+      return response.status(400).send(enviado)
     }
-    /* if (enviado && !enviado.aprobado) {
-    } */
+    return enviado
   }
 
   public async ejecucion({ request, response }: HttpContextContract) {
@@ -66,16 +61,11 @@ export default class ControladorReporte {
 
   public async enviarEjecucion({ request, response }: HttpContextContract) {    
     const payload = await request.obtenerPayloadJWT()
-    try {
-      const enviado = await this.service.enviarStEjecucion(request.all(), payload)
-      return enviado
-      
-    } catch (error) {
-      return response.status(400).send("se presento un error en el servidor")
-      
+    const enviado = await this.service.enviarStEjecucion(request.all(), payload)
+    if (enviado && !enviado.aprobado) {
+      return response.status(400).send(enviado)
     }
-   /*  if (enviado && !enviado.aprobado) {
-    } */
+    return enviado
   }
 
 }
