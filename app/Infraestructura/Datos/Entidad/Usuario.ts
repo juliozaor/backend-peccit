@@ -11,6 +11,7 @@ import { TblPatios } from './Patios';
 import { TblEmpresas } from './Empresas';
 import { TblDepartamentos } from './Departamentos';
 import { TblCiudades } from './Ciudades';
+import { TblReportaMunicipios } from './ReportaMunicipios';
 
 export default class TblUsuarios extends BaseModel {
   @column({ isPrimary: true, columnName: 'usn_id' })
@@ -198,5 +199,11 @@ export default class TblUsuarios extends BaseModel {
     foreignKey: 'municipioId'
   })
   public ciudades: BelongsTo<typeof TblCiudades>
+
+  @hasMany(() => TblReportaMunicipios, {
+    localKey: 'identificacion',
+    foreignKey: 'usuario'
+  })
+  public reportaMunicipio: HasMany<typeof TblReportaMunicipios>
 
 }

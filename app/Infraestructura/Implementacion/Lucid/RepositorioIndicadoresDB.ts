@@ -683,12 +683,14 @@ if(!objetivosUsuario ){
       }
       if (formulario.adicionales.length != 0) {
         formulario.adicionales.forEach(adicional => {
+          
+          
           if (adicional.obligatoria) {
             if ((!adicional.respuesta || adicional.respuesta === '')) {
               faltantesAdicionales.push(adicional.idAdicional);
               aprobado = false;
             }
-           
+            
 
             
             if (adicional.respuesta && adicional.respuesta !== '' ) {
@@ -706,12 +708,15 @@ if(!objetivosUsuario ){
                 });
               }
             }
-            
+          
+if(adicional.tipoPregunta == 'SELECT' && adicional.respuesta == 'S'){
             if(adicional.adjuntable && adicional.adjuntableObligatorio && adicional.respuesta !== '0' 
             && adicional.documento === ''){
               faltantesAdicionales.push(adicional.idAdicional);
               aprobado = false;
             }
+          }
+
             } //final si
 
 

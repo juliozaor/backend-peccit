@@ -63,8 +63,8 @@ if(params.termino){
     .preload('ciudades').first()
     if(usuarioDb){
       const usuario = usuarioDb.obtenerUsuario()
-      usuario.nombreDepartamento = usuarioDb.departamentos.name
-      usuario.nombreCiudad = usuarioDb.ciudades.name
+      usuario.nombreDepartamento = usuarioDb.departamentos?.name
+      usuario.nombreCiudad = usuarioDb.ciudades?.name
       return usuario
     }
     return null
