@@ -11,7 +11,6 @@ export class ServicioUsuario {
     async actualizarInformacionUsuario(informacion: PeticionActualizarUsuario, identificacion: string): Promise<Usuario> {
         let usuario = await this.obtenerUsuario(identificacion)
         usuario = this.actualizarInformacion(usuario, informacion)
-
         await this.repositorioUsuarios.actualizarUsuario(usuario.id, usuario)
         return usuario
     }
@@ -28,12 +27,10 @@ export class ServicioUsuario {
       }
 
     private actualizarInformacion(
-        usuario: | Usuario,
+        usuario: Usuario,
         informacion: PeticionActualizarUsuario): Usuario {
         for (const nuevoDato in informacion) {
-            if (usuario[nuevoDato]) {
-                usuario[nuevoDato] = informacion[nuevoDato]
-            }
+            usuario[nuevoDato] = informacion[nuevoDato]
         }
         return usuario
     }
