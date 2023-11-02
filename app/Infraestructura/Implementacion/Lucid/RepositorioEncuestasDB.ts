@@ -328,12 +328,12 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
     if (confirmar) aprobado = true;
 
      //verificar empresas
- /*  const empresas = await TblEmpresas.query().where('emp_usuario_id', idUsuario).first();  
+  const empresas = await TblEmpresas.query().where('emp_usuario_id', idUsuario).first();  
   
   if(!empresas){
     aprobado = false;
     tieneEmpresa = false;
-  } */
+  }
 
     //Verificar sedes
     const sedesOperativas = await TblSedesOperativas.query().where('seo_usuario_id', idUsuario).first();
@@ -386,7 +386,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
 
     }
 
-    return { aprobado, faltantes, sedes }
+    return { aprobado, faltantes, sedes,tieneEmpresa }
 
   }
 
