@@ -4,13 +4,24 @@ import { MapeadorPaginacionDB } from './MapeadorPaginacionDB';
 import { RepositorioUsuario } from 'App/Dominio/Repositorios/RepositorioUsuario';
 import { Usuario } from 'App/Dominio/Datos/Entidades/Usuario';
 import TblUsuarios from 'App/Infraestructura/Datos/Entidad/Usuario';
-import TblDetallesClasificaciones from 'App/Infraestructura/Datos/Entidad/detalleClasificacion';
 import TblEncuestas from 'App/Infraestructura/Datos/Entidad/Encuesta';
 import TblClasificacionesUsuario from 'App/Infraestructura/Datos/Entidad/ClasificacionesUsuario';
 import { ServicioAuditoria } from 'App/Dominio/Datos/Servicios/ServicioAuditoria';
 import { PayloadJWT } from '../../../Dominio/Dto/PayloadJWT';
+import { TblReportaMunicipios } from 'App/Infraestructura/Datos/Entidad/ReportaMunicipios';
+import { ReportaMunicipios } from 'App/Dominio/Datos/Entidades/ReportaMunicipios';
 export class RepositorioUsuariosDB implements RepositorioUsuario {
   private servicioAuditoria = new ServicioAuditoria();
+
+  async obtenerMunicipiosDeUsuario(idVigilado: string): Promise<ReportaMunicipios[]> {
+    const reportaMunicipiosDb = await TblReportaMunicipios.query()
+    .select('tbl_reporta_municipios.*', 'tbl_departamentos.name as nombreDepartamento', 'tbl_ciudades.name as nombreCiudad')
+    .leftJoin('tbl_departamentos', 'tbl_reporta_municipios.rmu_departamento', '=', 'tbl_departamentos.id')
+    .leftJoin('tbl_ciudades', 'tbl_reporta_municipios.rmu_municipio', '=', 'tbl_ciudades.id')
+    .where('tbl_reporta_municipios.rmu_usuario', idVigilado)
+    return reportaMunicipiosDb.map( reportaMunicipioDb => reportaMunicipioDb.obtenerReportaMunicipios() )
+  }
+  
   async obtenerUsuarios (params: any): Promise<{usuarios: Usuario[], paginacion: Paginador}> {
     const usuarios: Usuario[] = []
 

@@ -4,6 +4,7 @@ const accion_path = '../../../app/Presentacion/Usuario/ControladorUsuario'
 const controlador = '../../../app/Presentacion/Usuarios/ControladorUsuario'
 
 Route.group(() => {
+  Route.get('/municipios/:idVigilado', `${accion_path}.obtenerMunicipiosDeUsuario`)
   Route.patch('/:identificacion', `${accion_path}.actualizarUsuario`)
   Route.get('/categorizacion', `${accion_path}.categorizar`)
   Route.post('/registro', `${controlador}.guardarUsuario`)

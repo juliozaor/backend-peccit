@@ -15,6 +15,12 @@ export default class ControladorUsuario {
         response.status(200).send(usuario)
     }
 
+    async obtenerMunicipiosDeUsuario({request, response}: HttpContextContract){
+        const idVigilado = String(request.param('idVigilado')) 
+        const municipios = await this.servicio.obtenerMunicipiosUsuario(idVigilado)
+        response.status(200).send(municipios)
+    }
+
     async categorizar({request, response}: HttpContextContract){
         const {idEncuesta} = request.all()
         const payload = await request.obtenerPayloadJWT()        
