@@ -24,15 +24,17 @@ export class TblReportaMunicipios extends BaseModel {
 
     public obtenerReportaMunicipios(): ReportaMunicipios {
         const reportaMunicipios = new ReportaMunicipios()
-         reportaMunicipios.id = this.id
-         reportaMunicipios.departamento = this.departamento
-         reportaMunicipios.municipio = this.municipio
-         reportaMunicipios.usuario = this.usuario
-         reportaMunicipios.convenio = this.convenio
-         reportaMunicipios.ruta = this.ruta
-         reportaMunicipios.documento = this.documento
-         reportaMunicipios.nombreOriginal = this.nombreOriginal
-         reportaMunicipios.estado = this.estado
+        reportaMunicipios.id = this.id
+        reportaMunicipios.departamento = this.departamento
+        reportaMunicipios.municipio = this.municipio
+        reportaMunicipios.usuario = this.usuario
+        reportaMunicipios.convenio = this.convenio
+        reportaMunicipios.ruta = this.ruta
+        reportaMunicipios.documento = this.documento
+        reportaMunicipios.nombreOriginal = this.nombreOriginal
+        reportaMunicipios.estado = this.estado
+        reportaMunicipios.nombreDepartamento = this.$extras["nombreDepartamento"] ?? undefined
+        reportaMunicipios.nombreMunicipio = this.$extras["nombreCiudad"] ?? undefined
         return reportaMunicipios
     }
 
