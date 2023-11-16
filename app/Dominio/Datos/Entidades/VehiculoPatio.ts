@@ -4,4 +4,6 @@ export class VehiculoPatio {
   ingreso: Date;
   vigilado: string;
   patioId: string;
+  vigencia: number;
+  mes: number;
 }

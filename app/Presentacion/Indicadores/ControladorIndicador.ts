@@ -87,7 +87,7 @@ export default class ControladorReporte {
   }
 
   public async importar({ request, response }: HttpContextContract) {
-    const { tipo, idVigilado } = request.all() //1:patios, 2:empresas
+    const { tipo, idVigilado, vigencia, mes } = request.all() //1:patios, 2:empresas
     const archivo = request.file('archivo', {
       extnames: ['xlsx', 'xls'],
     })
@@ -99,7 +99,7 @@ export default class ControladorReporte {
       return response.status(415).send({ mensaje: `Formato inválido: no se puede cargar el archivo seleccionado. Inténtalo nuevamnte` })
     }
     try {
-      const respuesta = await this.servicioImportacionVehiculos.importDataXLSX(tipo, archivo, idVigilado)
+      const respuesta = await this.servicioImportacionVehiculos.importDataXLSX(tipo, archivo, idVigilado, vigencia, mes)
       return response.status(200).send(respuesta)
 
     } catch (error) {

@@ -11,6 +11,10 @@ export class TblVehiculosPatios extends BaseModel {
   public vigilado: string;
   @column({ columnName: 'veh_patio_id' })
   public patioId: string;
+  @column({ columnName: 'veh_vigencia' })
+  public vigencia: number;
+  @column({ columnName: 'veh_mes' })
+  public mes: number;
 
 
   public estableceVehiculoConId(vehiculo: VehiculoPatio) {
@@ -18,6 +22,8 @@ export class TblVehiculosPatios extends BaseModel {
     this.ingreso = vehiculo.ingreso
     this.vigilado = vehiculo.vigilado
     this.patioId = vehiculo.patioId
+    this.vigencia = vehiculo.vigencia
+    this.mes = vehiculo.mes
   }
 
   public estableceVehiculo(vehiculo: VehiculoPatio) {

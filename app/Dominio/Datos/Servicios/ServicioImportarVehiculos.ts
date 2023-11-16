@@ -6,8 +6,10 @@ import { VehiculoPatio } from '../Entidades/VehiculoPatio';
 import { TblVehiculosPatios } from 'App/Infraestructura/Datos/Entidad/vehiculosPatios';
 import { TblVehiculosModalidades } from 'App/Infraestructura/Datos/Entidad/vehiculosModalidades';
 import { VehiculoModalidad } from '../Entidades/VehiculoModalidad';
+import fs from 'fs';
 export class ServicioImportarVehiculos {
-  public async importDataXLSX(tipo: number, archivo: MultipartFileContract, idVigilado: string) {
+  public async importDataXLSX(tipo: number, archivo: MultipartFileContract, idVigilado: string, vigencia: number, mes: number) {
+    let rutaArchivo;
     try {
       const fname = `${new Date().getTime()}.${archivo.extname}`;
       const dir = 'uploads/';
@@ -23,31 +25,30 @@ export class ServicioImportarVehiculos {
       }
 
       const filePath = path.resolve(`${dir}${fname}`);
-      console.log(filePath);
-
+      rutaArchivo = filePath;
       // Resto de la lógica del servicio...
-      let send = await this.importClassification(filePath, tipo, idVigilado)
+      let send = await this.importClassification(filePath, tipo, idVigilado, vigencia, mes)
       console.log(send)
 
       return [null, 'Archivo cargado exitosamente.'];
     } catch (error) {
       console.error(error);
       return [error, 'Error interno del servidor.'];
-    }/* finally {
+    }finally {
       // Eliminar el archivo, independientemente del resultado
-      if (filePath) {
+      if (rutaArchivo) {
         try {
-          await fs.promises.unlink(filePath);
+          await fs.promises.unlink(rutaArchivo);
           console.log('Archivo eliminado exitosamente.');
         } catch (unlinkError) {
           console.error('Error al eliminar el archivo:', unlinkError);
         }
       }
-    } */
+    }
 
   }
 
-  importClassification = async (filelocation, tipo, idVigilado) => {
+  importClassification = async (filelocation, tipo, idVigilado, vigencia, mes) => {
     let libro = new Excel.Workbook()
 
     libro = await libro.xlsx.readFile(filelocation)
@@ -57,11 +58,11 @@ export class ServicioImportarVehiculos {
     let colComment = hoja.getColumn('A') //column name
     if (tipo == 1) {
       
-      this.importPatios(colComment, idVigilado, hoja);
+      this.importPatios(colComment, idVigilado, hoja, vigencia, mes);
     } 
     
     if (tipo == 2) {
-      this.importModalidades(colComment, idVigilado, hoja);
+      this.importModalidades(colComment, idVigilado, hoja, vigencia, mes);
       
     }
 
@@ -69,8 +70,8 @@ export class ServicioImportarVehiculos {
 
   }
 
-  importPatios = async (colComment, idVigilado, hoja) => {
-    await TblVehiculosPatios.query().where('veh_vigilado', idVigilado).delete();
+  importPatios = async (colComment, idVigilado, hoja, vigencia, mes) => {
+    await TblVehiculosPatios.query().where({'veh_vigilado': idVigilado, 'veh_vigencia':vigencia, 'veh_mes':mes}).delete();
     colComment.eachCell(async (cell, rowNumber) => {
       if (rowNumber >= 2) {
         const patio = hoja.getCell('A' + rowNumber).value
@@ -83,8 +84,8 @@ export class ServicioImportarVehiculos {
             patioId: patio,
             placa: placa.toString().toLocaleLowerCase(),
             ingreso: ingreso,
-            vigilado: idVigilado
-
+            vigilado: idVigilado,
+            vigencia, mes
           }
           try {
             const vehiculo = new TblVehiculosPatios()
@@ -105,8 +106,8 @@ export class ServicioImportarVehiculos {
 
   }
 
-  importModalidades = async (colComment, idVigilado, hoja) => {
-    await TblVehiculosModalidades.query().where('vep_vigilado', idVigilado).delete();
+  importModalidades = async (colComment, idVigilado, hoja, vigencia, mes) => {
+    await TblVehiculosModalidades.query().where({'vep_vigilado': idVigilado, 'vep_vigencia':vigencia, 'vep_mes':mes}).delete();
     colComment.eachCell(async (cell, rowNumber) => {
       if (rowNumber >= 2) {
         const nit = hoja.getCell('A' + rowNumber).value
@@ -119,7 +120,9 @@ export class ServicioImportarVehiculos {
             nit,
             placa: placa.toString().toLocaleLowerCase(),
             modalidadId: modalidad,
-            vigilado: idVigilado
+            vigilado: idVigilado,
+            vigencia,
+            mes
 
           }
           try {

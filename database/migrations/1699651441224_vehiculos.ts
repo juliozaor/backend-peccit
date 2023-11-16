@@ -9,6 +9,8 @@ export default class extends BaseSchema {
       table.string('veh_placa')
       table.date('veh_ingreso')
       table.string('veh_vigilado')      
+      table.integer('veh_vigencia')      
+      table.integer('veh_mes')      
       table.integer('veh_patio_id').references('pat_id').inTable('tbl_patios')    
     })
   }

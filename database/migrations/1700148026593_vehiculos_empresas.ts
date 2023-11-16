@@ -9,6 +9,8 @@ export default class extends BaseSchema {
       table.string('vep_nit')
       table.string('vep_placa')
       table.string('vep_vigilado')
+      table.integer('vep_vigencia')      
+      table.integer('vep_mes')   
       table.integer('vep_modalidad_id').references('smo_id').inTable('tbl_servicios_modalidades')    
     })
   }

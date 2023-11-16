@@ -4,4 +4,6 @@ export class VehiculoModalidad {
   placa: string;
   vigilado: string;
   modalidadId: string;
+  vigencia: number;
+  mes: number;
 }
