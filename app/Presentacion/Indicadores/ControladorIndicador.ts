@@ -96,7 +96,7 @@ export default class ControladorReporte {
     }
 
     if (!archivo.isValid) {
-      return response.status(415).send({ mensaje: `Formato inválido: no se puede cargar el archivo seleccionado. Inténtalo nuevamnte, los tipos de archivos permitidos son ${formatos}` })
+      return response.status(415).send({ mensaje: `Formato inválido: no se puede cargar el archivo seleccionado. Inténtalo nuevamnte` })
     }
     try {
       const respuesta = await this.servicioImportacionVehiculos.importDataXLSX(tipo, archivo, idVigilado)
