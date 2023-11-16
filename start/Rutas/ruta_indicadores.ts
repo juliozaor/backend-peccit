@@ -9,4 +9,9 @@ Route.group(() => {
   Route.post('/enviar', accion_path + '.enviar')
   Route.post('/enviarEjecucion', accion_path + '.enviarEjecucion')
   Route.get('/ejecucion', accion_path + '.ejecucion')
+  Route.get('/patios', accion_path + '.patios')
+  Route.get('/empresas', accion_path + '.empresas')
+  Route.post('/importar-excel',accion_path + '.importar')
 }).prefix('api/v1/inidicador').middleware('autenticacionJwt')
+
+Route.get('/api/v1/inidicador/plantillas/:archivo', accion_path+'.obtener')

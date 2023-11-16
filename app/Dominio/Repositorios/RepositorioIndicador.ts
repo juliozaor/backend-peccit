@@ -8,5 +8,6 @@ export interface RepositorioIndicador {
   ejecucion(param: any): Promise<any>
   guardarEjecucion(datos: string, documento:string): Promise<any>  
   enviarStEjecucion(param: any): Promise<any>
-
+  patios(param: any): Promise<any>
+  empresas(param: any): Promise<any>
 }
