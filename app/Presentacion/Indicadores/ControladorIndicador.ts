@@ -122,7 +122,7 @@ export default class ControladorReporte {
           
   
           let archivoDescargar = fs.readFileSync(`${absolutePath}`, 'base64');          
-          return { archivoDescargar }
+          return { nombre: archivo, archivoDescargar}
       } catch (error) {
           return {
               mensaje: `No se encontro el archivo solicitado`,

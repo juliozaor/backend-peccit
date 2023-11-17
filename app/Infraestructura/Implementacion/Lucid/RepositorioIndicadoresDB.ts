@@ -554,8 +554,8 @@ if(!objetivosUsuario ){
 
     return {
       patios: usuario?.patios??[],
-      plantilla: `${Env.get('HOSTING')}/inidicador/plantillas/placas-patios.xlsx`,
-      cargados:`${Env.get('HOSTING')}/exportar/vehiculos-patios?idVigilado=${idVigilado}`
+      plantilla: `/inidicador/plantillas/placas-patios.xlsx`,
+      cargados:`/exportar/vehiculos-patios?idVigilado=${idVigilado}`
     }
 
   }
@@ -571,8 +571,8 @@ if(!objetivosUsuario ){
 
     return {
       empresas: usuario?.empresas??[],
-      plantilla: `${Env.get('HOSTING')}/inidicador/plantillas/placas-empresa.xlsx`,
-      cargados:`${Env.get('HOSTING')}/exportar/vehiculos-patios?idVigilado=${idVigilado}`
+      plantilla: `/inidicador/plantillas/placas-empresa.xlsx`,
+      cargados:`/exportar/vehiculos-patios?idVigilado=${idVigilado}`
     }
 
   }
