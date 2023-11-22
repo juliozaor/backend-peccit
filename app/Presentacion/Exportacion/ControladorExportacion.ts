@@ -33,33 +33,33 @@ export default class ControladorExportacion {
       { header: 'VALIDADO ', key: "validado", width: 40 },]
 
 
- const data = await this.reporteTrazabilidad.Trazabilidad();
+    const data = await this.reporteTrazabilidad.Trazabilidad();
 
- return data
-    
-   /*  const buffer = await this.servicioExportacion.encuestaToXLSX(data, cabeceras)
+    return data
 
-    // Configurar opciones de respuesta
-    response.header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    response.header('Content-Disposition', 'attachment; filename=datos.xlsx');
-
-    // Enviar el archivo XLSX como respuesta
-    response.send(buffer); */
+    /*  const buffer = await this.servicioExportacion.encuestaToXLSX(data, cabeceras)
+ 
+     // Configurar opciones de respuesta
+     response.header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+     response.header('Content-Disposition', 'attachment; filename=datos.xlsx');
+ 
+     // Enviar el archivo XLSX como respuesta
+     response.send(buffer); */
   }
 
-  
+
 
   public async encuestaToXLSX({ request, response }: HttpContextContract) {
-const {idReporte} = request.all()
-const data = await this.reporteTrazabilidad.Encuesta(idReporte)
-const cabeceras = [
-  { header: 'No', key: 'no', width: 10 },
-  { header: 'Pregunta', key: 'pregunta', width: 100 },
-  { header: '¿Existe?', key: 'existe', width: 10 },
-  { header: 'Tipo de evidencia', key: 'tipoEvidencia', width: 40 },
-  { header: 'Documento', key: 'documento', width: 30 },
-]
-const buffer = await this.servicioExportacion.encuestaToXLSX(data, cabeceras)
+    const { idReporte } = request.all()
+    const data = await this.reporteTrazabilidad.Encuesta(idReporte)
+    const cabeceras = [
+      { header: 'No', key: 'no', width: 10 },
+      { header: 'Pregunta', key: 'pregunta', width: 100 },
+      { header: '¿Existe?', key: 'existe', width: 10 },
+      { header: 'Tipo de evidencia', key: 'tipoEvidencia', width: 40 },
+      { header: 'Documento', key: 'documento', width: 30 },
+    ]
+    const buffer = await this.servicioExportacion.encuestaToXLSX(data, cabeceras)
 
     // Configurar opciones de respuesta
     response.header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -68,50 +68,50 @@ const buffer = await this.servicioExportacion.encuestaToXLSX(data, cabeceras)
     // Enviar el archivo XLSX como respuesta
     response.send(buffer);
     //response.send(await this.reporteTrazabilidad.Encuesta(idReporte))
-       
-     }
 
-     public async vehiculosPatios({ request, response }: HttpContextContract) {
-      const {idVigilado} = request.all()
+  }
 
-      
-      const data = await TblVehiculosPatios.query().where('veh_vigilado', idVigilado)
-      const cabeceras = [
-        { header: 'identificacion-patio', key: 'patioId', width: 40 },
-        { header: 'numero-placa', key: 'placa', width: 40 },
-        { header: 'fecha-ingreso', key: 'ingreso', width: 40 },
-      ]
-      const buffer = await this.servicioExportacion.encuestaToXLSX(data, cabeceras)
-      
-          // Configurar opciones de respuesta
-          response.header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-          response.header('Content-Disposition', 'attachment; filename=datos.xlsx');
-      
-          // Enviar el archivo XLSX como respuesta
-          response.send(buffer);
-          //response.send(await this.reporteTrazabilidad.Encuesta(idReporte))
-             
-           }
+  public async vehiculosPatios({ request, response }: HttpContextContract) {
+    const { idVigilado, vigencia, idMes } = request.all()
 
-           public async vehiculosModalidades({ request, response }: HttpContextContract) {
-            const {idVigilado} = request.all()
-      
-            
-            const data = await TblVehiculosModalidades.query().where('vep_vigilado', idVigilado)
-            const cabeceras = [
-              { header: 'nit-empresa', key: 'nit', width: 40 },
-              { header: 'id-modalidad', key: 'modalidadId', width: 40 },
-              { header: 'numero-placa', key: 'placa', width: 40 },
-            ]
-            const buffer = await this.servicioExportacion.encuestaToXLSX(data, cabeceras)
-            
-                // Configurar opciones de respuesta
-                response.header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                response.header('Content-Disposition', 'attachment; filename=datos.xlsx');
-            
-                // Enviar el archivo XLSX como respuesta
-                response.send(buffer);
-                //response.send(await this.reporteTrazabilidad.Encuesta(idReporte))
-                   
-                 }
+
+    const data = await TblVehiculosPatios.query().where({'veh_vigilado': idVigilado, 'veh_mes': idMes,'veh_vigencia':vigencia})
+    const cabeceras = [
+      { header: 'identificacion-patio', key: 'patioId', width: 40 },
+      { header: 'numero-placa', key: 'placa', width: 40 },
+      { header: 'fecha-ingreso', key: 'ingreso', width: 40 },
+    ]
+    const buffer = await this.servicioExportacion.encuestaToXLSX(data, cabeceras)
+
+    // Configurar opciones de respuesta
+    response.header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    response.header('Content-Disposition', 'attachment; filename=datos.xlsx');
+
+    // Enviar el archivo XLSX como respuesta
+    response.send(buffer);
+    //response.send(await this.reporteTrazabilidad.Encuesta(idReporte))
+
+  }
+
+  public async vehiculosModalidades({ request, response }: HttpContextContract) {
+    const { idVigilado, vigencia, idMes } = request.all()
+
+
+    const data = await TblVehiculosModalidades.query().where({'vep_vigilado':idVigilado, 'vep_mes': idMes,'vep_vigencia':vigencia})
+    const cabeceras = [
+      { header: 'nit-empresa', key: 'nit', width: 40 },
+      { header: 'id-modalidad', key: 'modalidadId', width: 40 },
+      { header: 'numero-placa', key: 'placa', width: 40 },
+    ]
+    const buffer = await this.servicioExportacion.encuestaToXLSX(data, cabeceras)
+
+    // Configurar opciones de respuesta
+    response.header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    response.header('Content-Disposition', 'attachment; filename=datos.xlsx');
+
+    // Enviar el archivo XLSX como respuesta
+    response.send(buffer);
+    //response.send(await this.reporteTrazabilidad.Encuesta(idReporte))
+
+  }
 }

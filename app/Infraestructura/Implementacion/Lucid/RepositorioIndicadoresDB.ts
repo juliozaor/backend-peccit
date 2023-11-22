@@ -544,7 +544,7 @@ if(!objetivosUsuario ){
   }
 
   async patios(params: any): Promise<any> {
-    const { idUsuario, idVigilado, idReporte, historico, idMes, idRol } = params;
+    const { idVigilado, idMes, vigencia} = params;
    /*  const reporte = await TblReporte.findOrFail(idReporte)
     const { ejecucionEditable } = await this.servicioAcciones.obtenerAccion(reporte?.estadoVerificacionId ?? 0, idRol);
 
@@ -555,13 +555,13 @@ if(!objetivosUsuario ){
     return {
       patios: usuario?.patios??[],
       plantilla: `/inidicador/plantillas/placas-patios.xlsx`,
-      cargados:`/exportar/vehiculos-patios?idVigilado=${idVigilado}`
+      cargados:`/exportar/vehiculos-patios?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`
     }
 
   }
 
   async empresas(params: any): Promise<any> {
-    const { idUsuario, idVigilado, idReporte, historico, idMes, idRol } = params;
+    const {idVigilado, idMes, vigencia} = params;
    /*  const reporte = await TblReporte.findOrFail(idReporte)
     const { ejecucionEditable } = await this.servicioAcciones.obtenerAccion(reporte?.estadoVerificacionId ?? 0, idRol);
 
@@ -572,7 +572,7 @@ if(!objetivosUsuario ){
     return {
       empresas: usuario?.empresas??[],
       plantilla: `/inidicador/plantillas/placas-empresa.xlsx`,
-      cargados:`/exportar/vehiculos-patios?idVigilado=${idVigilado}`
+      cargados:`/exportar/vehiculos-patios?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`
     }
 
   }

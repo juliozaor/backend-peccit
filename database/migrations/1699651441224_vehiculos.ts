@@ -11,7 +11,7 @@ export default class extends BaseSchema {
       table.string('veh_vigilado')      
       table.integer('veh_vigencia')      
       table.integer('veh_mes')      
-      table.integer('veh_patio_id').references('pat_id').inTable('tbl_patios')    
+      table.integer('veh_patio_id').references('pat_id').inTable('tbl_patios').onDelete('cascade').onUpdate('cascade')
     })
   }
 
