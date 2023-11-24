@@ -58,7 +58,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
     consulta.preload('estadoVigilado')
 
     if (idEncuesta == 2 || idEncuesta == 3) {
-      consulta.where('anio_vigencia', anioVigencia?.anio!)
+     consulta.where('anio_vigencia', anioVigencia?.anio!)
     }
     if (termino) {
       consulta.andWhere(subquery => {
