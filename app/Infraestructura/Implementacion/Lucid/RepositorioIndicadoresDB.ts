@@ -599,7 +599,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     const { respuestasActividades, reporteId, adicionales, mesId } = JSON.parse(datos);
 
     const { anioVigencia, idEncuesta } = await TblReporte.findByOrFail('id', reporteId)
-    this.servicioEstado.estadoReporte(reporteId, anioVigencia ?? 2023, mesId, 1003)
+    this.servicioEstado.estadoReporte(reporteId, anioVigencia ?? 2023, mesId, 1003, null)
     for await (const respuesta of respuestasActividades) {
 
       const existeDatos = await TblDetalleDatos.query().where({ 'ddt_dato_indicador_id': respuesta.preguntaId, 'ddt_reporte_id': reporteId }).first()
