@@ -16,6 +16,7 @@ import { TblDetallesAdicionales } from 'App/Infraestructura/Datos/Entidad/Detall
 import { DetalleAdicional } from 'App/Dominio/Datos/Entidades/DetalleAdicional';
 import { TblAnioVigencias } from 'App/Infraestructura/Datos/Entidad/AnioVigencia';
 import { ServicioAcciones } from 'App/Dominio/Datos/Servicios/ServicioAcciones';
+import Env from '@ioc:Adonis/Core/Env';
 
 export class RepositorioIndicadoresDB implements RepositorioIndicador {
   private servicioAuditoria = new ServicioAuditoria();
@@ -448,14 +449,9 @@ if(!objetivosUsuario ){
 
 
     const formulariosBD = await consulta.where('id', 5)
-
-
     formulariosBD.forEach(formulario => {
-      // const nombre = formulario.nombre
-      // const mensaje = formulario.mensaje
       const actividades: any = [];
       formulario.subIndicadores.forEach(subInd => {
-        // const preguntas: any = []
         subInd.datosIndicadores.forEach(datos => {
 
           actividades.push({
@@ -482,21 +478,10 @@ if(!objetivosUsuario ){
               tipoDato: subInd.periodo.tipo,
               cantDecimal: subInd.periodo.decimal
             },
-            /*   observacion: "",
-              cumple: "",
-              observacionCumple: "",
-              corresponde: "",
-              observacionCorresponde: "" */
           })
 
 
         });
-        /*   if (preguntas.length >= 1) {
-            actividades.push({
-              nombre: subInd.nombre,
-              meses: preguntas,
-            })
-          } */
       });
 
       const evidencias: any = [];
@@ -535,6 +520,8 @@ if(!objetivosUsuario ){
         });
       })
 
+     
+
       formularios.push({
         nombre: "Ejecución",
         // mensaje,
@@ -543,7 +530,8 @@ if(!objetivosUsuario ){
       })
 
     });
-
+    
+   
     return {
       idVigilado,
       idReporte,
@@ -553,6 +541,40 @@ if(!objetivosUsuario ){
       mes: idMes,
       formularios
     }
+  }
+
+  async patios(params: any): Promise<any> {
+    const { idVigilado, idMes, vigencia} = params;
+   /*  const reporte = await TblReporte.findOrFail(idReporte)
+    const { ejecucionEditable } = await this.servicioAcciones.obtenerAccion(reporte?.estadoVerificacionId ?? 0, idRol);
+
+
+    const soloLectura = (historico && historico == 'true' || idUsuario !== idVigilado || !ejecucionEditable) ?? false; */
+    const usuario = await TblUsuarios.query().preload('patios').where('identificacion', idVigilado).first()
+
+    return {
+      patios: usuario?.patios??[],
+      plantilla: `/inidicador/plantillas/placas-patios.xlsx`,
+      cargados:`/exportar/vehiculos-patios?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`
+    }
+
+  }
+
+  async empresas(params: any): Promise<any> {
+    const {idVigilado, idMes, vigencia} = params;
+   /*  const reporte = await TblReporte.findOrFail(idReporte)
+    const { ejecucionEditable } = await this.servicioAcciones.obtenerAccion(reporte?.estadoVerificacionId ?? 0, idRol);
+
+
+    const soloLectura = (historico && historico == 'true' || idUsuario !== idVigilado || !ejecucionEditable) ?? false; */
+    const usuario = await TblUsuarios.query().preload('empresas').where('identificacion', idVigilado).first()
+
+    return {
+      empresas: usuario?.empresas??[],
+      plantilla: `/inidicador/plantillas/placas-empresa.xlsx`,
+      cargados:`/exportar/vehiculos-patios?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`
+    }
+
   }
 
   async guardarEjecucion(datos: string, documento: string): Promise<any> {
@@ -659,6 +681,8 @@ if(!objetivosUsuario ){
   async enviarStEjecucion(params: any): Promise<any> {
     const { idReporte, idVigilado, idUsuario } = params
     let aprobado = true;
+    let faltaArchivoPatios = false 
+    let faltaArchivoEmpresas = false 
     const faltantesActividades = new Array();
     const faltantesAdicionales = new Array();
 
@@ -737,7 +761,7 @@ if(adicional.tipoPregunta == 'SELECT' && adicional.respuesta == 'S'){
     }
 
     //return indicadores
-    return { aprobado, faltantesActividades, faltantesAdicionales }
+    return { aprobado, faltantesActividades, faltantesAdicionales, faltaArchivoPatios, faltaArchivoEmpresas }
 
   }
 
