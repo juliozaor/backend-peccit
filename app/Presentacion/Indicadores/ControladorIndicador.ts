@@ -11,7 +11,7 @@ import { RepositorioRespuestasDB } from '../../Infraestructura/Implementacion/Lu
 
 export default class ControladorReporte {
   private service: ServicioIndicadores;
-  private servicioImportacionVehiculos
+  private servicioImportacionVehiculos: ServicioImportarVehiculos
   constructor() {
     this.service = new ServicioIndicadores(
       new RepositorioIndicadoresDB()
@@ -100,7 +100,8 @@ export default class ControladorReporte {
     }
     try {
       const respuesta = await this.servicioImportacionVehiculos.importDataXLSX(tipo, archivo, idVigilado, vigencia, mes)
-      return response.status(200).send(respuesta)
+      console.log('En el controlador', respuesta)
+      return response.status(respuesta.estado).send(respuesta.datos ?? respuesta.mensaje)
 
     } catch (error) {
       return response.status(400).send({ mensaje: 'Se presento un error al cargar el archivo' })
