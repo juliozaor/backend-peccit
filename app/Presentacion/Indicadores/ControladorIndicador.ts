@@ -102,7 +102,6 @@ export default class ControladorReporte {
       const respuesta = await this.servicioImportacionVehiculos.importDataXLSX(tipo, archivo, idVigilado, vigencia, mes)
       console.log('En el controlador', respuesta)
       return response.status(respuesta.estado).send(respuesta.datos ?? respuesta.mensaje)
-
     } catch (error) {
       return response.status(400).send({ mensaje: 'Se presento un error al cargar el archivo' })
     }
