@@ -308,7 +308,7 @@ export class ServicioImportarVehiculos {
     })
     csv.stringify()
     return new Promise<string>((resolve, reject) =>{
-      csv.stringify(dataCsv, undefined, (error, ouput)=>{
+      csv.stringify(dataCsv, {header: true}, (error, ouput)=>{
         if(error) reject(error);
         resolve(Buffer.from(ouput).toString('base64'))
       })
