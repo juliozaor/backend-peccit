@@ -306,11 +306,13 @@ export class ServicioImportarVehiculos {
     errores.forEach( (error, indice) => {
       dataCsv.push([ indice + 1, `${error.columna}${error.fila}`, error.error ])
     })
-    csv.stringify()
     return new Promise<string>((resolve, reject) =>{
-      csv.stringify(dataCsv, {header: true}, (error, ouput)=>{
-        if(error) reject(error);
-        resolve(Buffer.from(ouput).toString('base64'))
+      csv.stringify(dataCsv, {header: false}, (error, ouput)=>{
+        if(error){
+          reject(error)
+        }else{
+          resolve(Buffer.from(ouput).toString('base64'))
+        }
       })
     })
   }
