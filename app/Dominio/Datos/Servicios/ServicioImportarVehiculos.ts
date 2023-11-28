@@ -1,6 +1,7 @@
 import Excel from 'exceljs';
 import fs from 'fs';
 import * as path from 'path';
+import csv from 'csv-stringify'
 import { MultipartFileContract } from '@ioc:Adonis/Core/BodyParser';
 import { VehiculoPatio } from '../Entidades/VehiculoPatio';
 import { TblVehiculosPatios } from 'App/Infraestructura/Datos/Entidad/vehiculosPatios';
@@ -10,9 +11,16 @@ import { Resultado } from 'App/Dominio/Resultado';
 import { ErrorFormatoImportarExcel } from './Dtos/ErrorFormatoImportarExcel';
 import { TblPatios } from 'App/Infraestructura/Datos/Entidad/Patios';
 import TblModalidades from 'App/Infraestructura/Datos/Entidad/modalidad';
+import { RespuestaImportacionExcel } from './Dtos/RespuestaImportacionExcel';
 
 export class ServicioImportarVehiculos {
-  async importDataXLSX(tipo: number, archivo: MultipartFileContract, idVigilado: string, vigencia: number, mes: number): Promise<Resultado<ErrorFormatoImportarExcel[]>> {
+  async importDataXLSX(
+    tipo: number, 
+    archivo: MultipartFileContract, 
+    idVigilado: string, 
+    vigencia: number, 
+    mes: number
+  ): Promise<Resultado<RespuestaImportacionExcel>> {
     let rutaArchivo;
     try {
       const fname = `${new Date().getTime()}.${archivo.extname}`;
@@ -58,7 +66,7 @@ export class ServicioImportarVehiculos {
     }
   }
 
-  async importClassification(filelocation, tipo, idVigilado, vigencia, mes): Promise<Resultado<ErrorFormatoImportarExcel[]>> {
+  async importClassification(filelocation, tipo, idVigilado, vigencia, mes): Promise<Resultado<RespuestaImportacionExcel>> {
     let resultado: Resultado<ErrorFormatoImportarExcel[]>
     let libro = new Excel.Workbook()
     libro = await libro.xlsx.readFile(filelocation)
@@ -80,13 +88,14 @@ export class ServicioImportarVehiculos {
     colComment: Excel.Column,
     idVigilado: string,
     hoja: Excel.Worksheet,
-    vigencia, mes): Promise<Resultado<ErrorFormatoImportarExcel[]>> {
+    vigencia, mes): Promise<Resultado<RespuestaImportacionExcel>> {
     const errores = await this.validarPatios(hoja, idVigilado)
     if (errores.length > 0) {
+      const archivoB64 = await this.generarCsvErrores(errores)
       return new Resultado({
         exitoso: false,
         estado: 422,
-        datos: errores,
+        datos: { errores, archivo: archivoB64 },
         mensaje: 'Hay errores de validación.'
       })
     }
@@ -128,13 +137,14 @@ export class ServicioImportarVehiculos {
     hoja: Excel.Worksheet,
     vigencia: number,
     mes: number
-  ): Promise<Resultado<ErrorFormatoImportarExcel[]>> => {
+  ): Promise<Resultado<RespuestaImportacionExcel>> => {
     const errores = await this.validarModalidades(hoja)
     if(errores.length > 0){
+      const archivoB64 = await this.generarCsvErrores(errores)
       return new Resultado({
         exitoso: false,
         estado: 422,
-        datos: errores,
+        datos: {errores, archivo: archivoB64},
         mensaje: 'Hay errores de validación.'
       })
     }
@@ -287,6 +297,22 @@ export class ServicioImportarVehiculos {
       }
     })
     return errores
+  }
+
+  generarCsvErrores(errores: ErrorFormatoImportarExcel[]): Promise<string>{
+    const dataCsv: any[][] = []
+    const cabeceras = [ "Nro", "Celda", "Descripción" ]
+    dataCsv.push(cabeceras)
+    errores.forEach( (error, indice) => {
+      dataCsv.push([ indice + 1, `${error.columna}${error.fila}`, error.error ])
+    })
+    csv.stringify()
+    return new Promise<string>((resolve, reject) =>{
+      csv.stringify(dataCsv, undefined, (error, ouput)=>{
+        if(error) reject(error);
+        resolve(Buffer.from(ouput).toString('base64'))
+      })
+    })
   }
 
 }
