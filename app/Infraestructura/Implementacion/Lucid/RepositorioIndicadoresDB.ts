@@ -20,6 +20,7 @@ import Env from '@ioc:Adonis/Core/Env';
 import { TblEstadosReportes } from 'App/Infraestructura/Datos/Entidad/EstadosReportes';
 import { TblVehiculosPatios } from 'App/Infraestructura/Datos/Entidad/vehiculosPatios';
 import { TblVehiculosModalidades } from 'App/Infraestructura/Datos/Entidad/vehiculosModalidades';
+import { TblVehiculosMeses } from 'App/Infraestructura/Datos/Entidad/vehiculoMes';
 
 export class RepositorioIndicadoresDB implements RepositorioIndicador {
   private servicioAuditoria = new ServicioAuditoria();
@@ -563,14 +564,14 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
   async patios(params: any): Promise<any> {
     const { idVigilado, idMes, vigencia } = params;
-    /*  const reporte = await TblReporte.findOrFail(idReporte)
-     const { ejecucionEditable } = await this.servicioAcciones.obtenerAccion(reporte?.estadoVerificacionId ?? 0, idRol);
- 
- 
-     const soloLectura = (historico && historico == 'true' || idUsuario !== idVigilado || !ejecucionEditable) ?? false; */
+    // id : 1
+
+    const visible = await TblVehiculosMeses.query().select('vem_estado').where({ 'vem_mes': idMes, 'vem_tipo': 1 }).first()
+
     const usuario = await TblUsuarios.query().preload('patios').where('identificacion', idVigilado).first()
 
     return {
+      visible: visible?.estado ?? false,
       patios: usuario?.patios ?? [],
       plantilla: `/inidicador/plantillas/placas-patios.xlsx`,
       cargados: `/exportar/vehiculos-patios?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`
@@ -580,14 +581,11 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
   async empresas(params: any): Promise<any> {
     const { idVigilado, idMes, vigencia } = params;
-    /*  const reporte = await TblReporte.findOrFail(idReporte)
-     const { ejecucionEditable } = await this.servicioAcciones.obtenerAccion(reporte?.estadoVerificacionId ?? 0, idRol);
- 
- 
-     const soloLectura = (historico && historico == 'true' || idUsuario !== idVigilado || !ejecucionEditable) ?? false; */
+    const visible = await TblVehiculosMeses.query().select('vem_estado').where({ 'vem_mes': idMes, 'vem_tipo': 2 }).first()
     const usuario = await TblUsuarios.query().preload('empresas').where('identificacion', idVigilado).first()
 
     return {
+      visible: visible?.estado ?? false,
       empresas: usuario?.empresas ?? [],
       plantilla: `/inidicador/plantillas/placas-empresa.xlsx`,
       cargados: `/exportar/vehiculos-patios?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`
@@ -769,27 +767,27 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     });
 
 
-    const patios = await TblVehiculosPatios.query().where({'veh_vigilado': idVigilado, 'veh_vigencia':indicadores.vigencia, 'veh_mes':idMes})
-    if(patios.length <=1){
+    const patios = await TblVehiculosPatios.query().where({ 'veh_vigilado': idVigilado, 'veh_vigencia': indicadores.vigencia, 'veh_mes': idMes })
+    if (patios.length <= 1) {
       faltaArchivoPatios = true;
-      
+
     }
 
-    const modalidades = await TblVehiculosModalidades.query().where({'vep_vigilado': idVigilado, 'vep_vigencia':indicadores.vigencia, 'vep_mes':idMes})
-    if(modalidades.length <=1){
+    const modalidades = await TblVehiculosModalidades.query().where({ 'vep_vigilado': idVigilado, 'vep_vigencia': indicadores.vigencia, 'vep_mes': idMes })
+    if (modalidades.length <= 1) {
       faltaArchivoEmpresas = true;
-      
+
     }
-    
+
 
     if (aprobado) {
-     /*  this.servicioEstado.Log(idUsuario, 1007, reportes?.idEncuesta) */
+      /*  this.servicioEstado.Log(idUsuario, 1007, reportes?.idEncuesta) */
       this.servicioEstado.estadoReporte(idReporte, indicadores.vigencia, idMes, 1004, DateTime.fromJSDate(new Date()))
-    /*   const reporte = await TblReporte.findOrFail(idReporte)
-      reporte.fechaEnviostEjecucion = DateTime.fromJSDate(new Date())
-      reporte.envioStEjecucion = '1'
-      reporte.estadoVerificacionId = 1007
-      reporte.save(); */
+      /*   const reporte = await TblReporte.findOrFail(idReporte)
+        reporte.fechaEnviostEjecucion = DateTime.fromJSDate(new Date())
+        reporte.envioStEjecucion = '1'
+        reporte.estadoVerificacionId = 1007
+        reporte.save(); */
     }
 
     //return indicadores
