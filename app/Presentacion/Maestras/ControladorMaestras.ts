@@ -22,16 +22,17 @@ export default class ControladorReporte {
     const { historico } = request.only(['historico']);
 
     let mesesSql;
+    
 
+    const vigencia = await TblAnioVigencias.query().where('anv_estado', true).first();
     if (historico && historico == 'true') {
-      const vigencia = await TblAnioVigencias.query().where('anv_estado', true).first();
       if (vigencia?.anio == 2023) {
         mesesSql = await TblMeses.query().where('mes_habilitado', true).orderBy('mes_id', 'asc');
       } else {
         mesesSql = await TblMeses.query().orderBy('mes_id', 'asc');
       }
     } else {
-      mesesSql = await TblMeses.query().where('mes_estado', true).orderBy('mes_id', 'asc');
+      mesesSql = await TblMeses.query().where({'mes_estado': true, 'mes_vigencia':vigencia?.anio}).orderBy('mes_id', 'asc');
     }
 
 
