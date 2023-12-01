@@ -588,7 +588,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       visible: visible?.estado ?? false,
       empresas: usuario?.empresas ?? [],
       plantilla: `/inidicador/plantillas/placas-empresa.xlsx`,
-      cargados: `/exportar/vehiculos-patios?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`
+      cargados: `/exportar/vehiculos-modalidades?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`
     }
 
   }
