@@ -17,6 +17,10 @@ import { DetalleAdicional } from 'App/Dominio/Datos/Entidades/DetalleAdicional';
 import { TblAnioVigencias } from 'App/Infraestructura/Datos/Entidad/AnioVigencia';
 import { ServicioAcciones } from 'App/Dominio/Datos/Servicios/ServicioAcciones';
 import Env from '@ioc:Adonis/Core/Env';
+import { TblEstadosReportes } from 'App/Infraestructura/Datos/Entidad/EstadosReportes';
+import { TblVehiculosPatios } from 'App/Infraestructura/Datos/Entidad/vehiculosPatios';
+import { TblVehiculosModalidades } from 'App/Infraestructura/Datos/Entidad/vehiculosModalidades';
+import { TblVehiculosMeses } from 'App/Infraestructura/Datos/Entidad/vehiculoMes';
 
 export class RepositorioIndicadoresDB implements RepositorioIndicador {
   private servicioAuditoria = new ServicioAuditoria();
@@ -103,9 +107,9 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       formulario.subIndicadores.forEach(async subInd => {
         const preguntas: any = []
         contador += 1;
-       /*  for await (const datos of  subInd.datosIndicadores) {
-          
-        } */
+        /*  for await (const datos of  subInd.datosIndicadores) {
+           
+         } */
         subInd.datosIndicadores.forEach(datos => {
           if (contador == 1) {
             cabeceras.push(datos.nombre)
@@ -113,7 +117,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
           preguntas.push({
             datoId: datos.id,
             // pregunta: datos.nombre,
-            
+
             respuesta: datos.detalleDatos[0]?.valor ?? '',
             /*   tipoDeEvidencia: "",
               documento: "",
@@ -134,7 +138,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
               observacionCorresponde: "" */
           })
         });
-       // }
+        // }
         if (preguntas.length >= 1) {
           subIndicador.push({
             nombre: subInd.nombre,
@@ -205,7 +209,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       if (formulario.actividades.length != 0) {
         formulario.actividades.forEach(actividad => {
           if (actividad.meses.length != 0) {
-            actividad.meses.forEach(mes => {              
+            actividad.meses.forEach(mes => {
               if (actividad.obligatoria) {
                 if (!mes.respuesta || mes.respuesta === '') {
 
@@ -233,12 +237,12 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       }
     });
     //Verificar objetivos
-    const objetivosUsuario = await TblObjetivos.query().where('obj_usuario_id',idUsuario).first();
+    const objetivosUsuario = await TblObjetivos.query().where('obj_usuario_id', idUsuario).first();
 
-if(!objetivosUsuario ){
-  aprobado=false ;
-  objetivos = false;
-}
+    if (!objetivosUsuario) {
+      aprobado = false;
+      objetivos = false;
+    }
 
 
     if (aprobado) {
@@ -251,7 +255,7 @@ if(!objetivosUsuario ){
     }
 
     //return indicadores
-    return { aprobado, faltantesActividades, faltantesEvidencias, objetivos}
+    return { aprobado, faltantesActividades, faltantesEvidencias, objetivos }
 
   }
 
@@ -300,7 +304,7 @@ if(!objetivosUsuario ){
       if (respuesta.ruta) {
         data.ruta = respuesta.ruta
       }
-    
+
 
       if (existeDatos) {
         existeDatos.estableceDetalleDatosConId(data)
@@ -382,6 +386,21 @@ if(!objetivosUsuario ){
          mensaje: "No se encontro una planeación para este usuario",
        }
      } */
+    //Buscar el estado por la nueva tabla
+    const estadoreportes = await TblEstadosReportes.query()
+      .where({ 'reporte': idReporte, 'vigencia': reporte.anioVigencia, 'mes': idMes })
+      .orderBy('created_at', 'desc')
+      .first();
+
+    if (!estadoreportes) {
+      const newEstadoReporte = new TblEstadosReportes()
+      newEstadoReporte.reporte = idReporte
+      newEstadoReporte.vigencia = reporte.anioVigencia!
+      newEstadoReporte.mes = idMes
+      newEstadoReporte.estado = 1002
+      newEstadoReporte.save()
+    }
+
     const consulta = TblFormulariosIndicadores.query()
     const vigencia = reporte?.anioVigencia ?? undefined
     consulta.preload('subIndicadores', subIndicador => {
@@ -520,7 +539,7 @@ if(!objetivosUsuario ){
         });
       })
 
-     
+
 
       formularios.push({
         nombre: "Ejecución",
@@ -530,8 +549,8 @@ if(!objetivosUsuario ){
       })
 
     });
-    
-   
+
+
     return {
       idVigilado,
       idReporte,
@@ -544,49 +563,46 @@ if(!objetivosUsuario ){
   }
 
   async patios(params: any): Promise<any> {
-    const { idVigilado, idMes, vigencia} = params;
-   /*  const reporte = await TblReporte.findOrFail(idReporte)
-    const { ejecucionEditable } = await this.servicioAcciones.obtenerAccion(reporte?.estadoVerificacionId ?? 0, idRol);
+    const { idVigilado, idMes, vigencia } = params;
+    // id : 1
 
+    const visible = await TblVehiculosMeses.query().select('vem_estado').where({ 'vem_mes': idMes, 'vem_tipo': 1 }).first()
 
-    const soloLectura = (historico && historico == 'true' || idUsuario !== idVigilado || !ejecucionEditable) ?? false; */
     const usuario = await TblUsuarios.query().preload('patios').where('identificacion', idVigilado).first()
 
     return {
-      patios: usuario?.patios??[],
+      visible: visible?.estado ?? false,
+      patios: usuario?.patios ?? [],
       plantilla: `/inidicador/plantillas/placas-patios.xlsx`,
-      cargados:`/exportar/vehiculos-patios?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`
+      cargados: `/exportar/vehiculos-patios?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`
     }
 
   }
 
   async empresas(params: any): Promise<any> {
-    const {idVigilado, idMes, vigencia} = params;
-   /*  const reporte = await TblReporte.findOrFail(idReporte)
-    const { ejecucionEditable } = await this.servicioAcciones.obtenerAccion(reporte?.estadoVerificacionId ?? 0, idRol);
-
-
-    const soloLectura = (historico && historico == 'true' || idUsuario !== idVigilado || !ejecucionEditable) ?? false; */
+    const { idVigilado, idMes, vigencia } = params;
+    const visible = await TblVehiculosMeses.query().select('vem_estado').where({ 'vem_mes': idMes, 'vem_tipo': 2 }).first()
     const usuario = await TblUsuarios.query().preload('empresas').where('identificacion', idVigilado).first()
 
     return {
-      empresas: usuario?.empresas??[],
+      visible: visible?.estado ?? false,
+      empresas: usuario?.empresas ?? [],
       plantilla: `/inidicador/plantillas/placas-empresa.xlsx`,
-      cargados:`/exportar/vehiculos-patios?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`
+      cargados: `/exportar/vehiculos-modalidades?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`
     }
 
   }
 
   async guardarEjecucion(datos: string, documento: string): Promise<any> {
-    const { respuestasActividades, reporteId, adicionales } = JSON.parse(datos);
+    const { respuestasActividades, reporteId, adicionales, mesId } = JSON.parse(datos);
 
     const { anioVigencia, idEncuesta } = await TblReporte.findByOrFail('id', reporteId)
-    this.servicioEstado.Log(documento, 1006, idEncuesta, reporteId)
+    this.servicioEstado.estadoReporte(reporteId, anioVigencia ?? 2023, mesId, 1003, null)
     for await (const respuesta of respuestasActividades) {
 
       const existeDatos = await TblDetalleDatos.query().where({ 'ddt_dato_indicador_id': respuesta.preguntaId, 'ddt_reporte_id': reporteId }).first()
 
-      
+
       let data: DetalleDatos = {
         datoIndicadorId: respuesta.preguntaId,
         valorEjecutado: respuesta.valor,
@@ -594,9 +610,8 @@ if(!objetivosUsuario ){
         fechaActualizacion: DateTime.fromJSDate(new Date),
         anioActivoId: anioVigencia ?? 2023,
         observacion: respuesta.observacion ?? '',
-        
-      }
 
+      }
 
 
       if (respuesta.documento) {
@@ -608,7 +623,7 @@ if(!objetivosUsuario ){
       if (respuesta.ruta) {
         data.ruta = respuesta.ruta
       }
-  
+
 
       if (existeDatos) {
         existeDatos.estableceDetalleDatosConId(data)
@@ -679,10 +694,10 @@ if(!objetivosUsuario ){
   }
 
   async enviarStEjecucion(params: any): Promise<any> {
-    const { idReporte, idVigilado, idUsuario } = params
+    const { idReporte, idVigilado, idUsuario, idMes } = params
     let aprobado = true;
-    let faltaArchivoPatios = false 
-    let faltaArchivoEmpresas = false 
+    let faltaArchivoPatios = false
+    let faltaArchivoEmpresas = false
     const faltantesActividades = new Array();
     const faltantesAdicionales = new Array();
 
@@ -695,9 +710,9 @@ if(!objetivosUsuario ){
       if (formulario.actividades.length != 0) {
         formulario.actividades.forEach(actividad => {
           if (actividad.obligatoria) {
-            if ((!actividad.respuesta || actividad.respuesta === '') || 
-            (actividad.adjuntableObligatorio && actividad.documento === '')
-            && actividad.respuesta !== '0') {
+            if ((!actividad.respuesta || actividad.respuesta === '') ||
+              (actividad.adjuntableObligatorio && actividad.documento === '')
+              && actividad.respuesta !== '0') {
               faltantesActividades.push(actividad.datoId);
               aprobado = false;
             }
@@ -707,39 +722,39 @@ if(!objetivosUsuario ){
       }
       if (formulario.adicionales.length != 0) {
         formulario.adicionales.forEach(adicional => {
-          
-          
+
+
           if (adicional.obligatoria) {
             if ((!adicional.respuesta || adicional.respuesta === '')) {
               faltantesAdicionales.push(adicional.idAdicional);
               aprobado = false;
             }
-            
 
-            
-            if (adicional.respuesta && adicional.respuesta !== '' ) {
-            if(adicional.tieneObservacion && adicional.tieneObservacion == true){
-              const datoClave = adicional.habilitaObservacion!;
-              const arr = Object.values(datoClave);
-              if (arr.length !== 0) {
-                arr.forEach(dato => {
 
-                  if (adicional.respuesta === dato && (!adicional.observacion || adicional.observacion === '')) {
-                    faltantesAdicionales.push(adicional.idAdicional);
-                    aprobado = false;
-                  }
 
-                });
+            if (adicional.respuesta && adicional.respuesta !== '') {
+              if (adicional.tieneObservacion && adicional.tieneObservacion == true) {
+                const datoClave = adicional.habilitaObservacion!;
+                const arr = Object.values(datoClave);
+                if (arr.length !== 0) {
+                  arr.forEach(dato => {
+
+                    if (adicional.respuesta === dato && (!adicional.observacion || adicional.observacion === '')) {
+                      faltantesAdicionales.push(adicional.idAdicional);
+                      aprobado = false;
+                    }
+
+                  });
+                }
               }
-            }
-          
-if(adicional.tipoPregunta == 'SELECT' && adicional.respuesta == 'S'){
-            if(adicional.adjuntable && adicional.adjuntableObligatorio && adicional.respuesta !== '0' 
-            && adicional.documento === ''){
-              faltantesAdicionales.push(adicional.idAdicional);
-              aprobado = false;
-            }
-          }
+
+              if (adicional.tipoPregunta == 'SELECT' && adicional.respuesta == 'S') {
+                if (adicional.adjuntable && adicional.adjuntableObligatorio && adicional.respuesta !== '0'
+                  && adicional.documento === '') {
+                  faltantesAdicionales.push(adicional.idAdicional);
+                  aprobado = false;
+                }
+              }
 
             } //final si
 
@@ -751,13 +766,28 @@ if(adicional.tipoPregunta == 'SELECT' && adicional.respuesta == 'S'){
       }
     });
 
+
+    const patios = await TblVehiculosPatios.query().where({ 'veh_vigilado': idVigilado, 'veh_vigencia': indicadores.vigencia, 'veh_mes': idMes })
+    if (patios.length <= 1) {
+      faltaArchivoPatios = true;
+
+    }
+
+    const modalidades = await TblVehiculosModalidades.query().where({ 'vep_vigilado': idVigilado, 'vep_vigencia': indicadores.vigencia, 'vep_mes': idMes })
+    if (modalidades.length <= 1) {
+      faltaArchivoEmpresas = true;
+
+    }
+
+
     if (aprobado) {
-      this.servicioEstado.Log(idUsuario, 1007, reportes?.idEncuesta)
-      const reporte = await TblReporte.findOrFail(idReporte)
-      reporte.fechaEnviostEjecucion = DateTime.fromJSDate(new Date())
-      reporte.envioStEjecucion = '1'
-      reporte.estadoVerificacionId = 1007
-      reporte.save();
+      /*  this.servicioEstado.Log(idUsuario, 1007, reportes?.idEncuesta) */
+      this.servicioEstado.estadoReporte(idReporte, indicadores.vigencia, idMes, 1004, DateTime.fromJSDate(new Date()))
+      /*   const reporte = await TblReporte.findOrFail(idReporte)
+        reporte.fechaEnviostEjecucion = DateTime.fromJSDate(new Date())
+        reporte.envioStEjecucion = '1'
+        reporte.estadoVerificacionId = 1007
+        reporte.save(); */
     }
 
     //return indicadores
