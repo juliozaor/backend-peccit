@@ -566,7 +566,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     const { idVigilado, idMes, vigencia } = params;
     // id : 1
 
-    const visible = await TblVehiculosMeses.query().select('vem_estado').where({ 'vem_mes': idMes, 'vem_tipo': 1 }).first()
+    const visible = await TblVehiculosMeses.query().where({ 'vem_mes': idMes, 'vem_tipo': 1 }).first()
 
     const usuario = await TblUsuarios.query().preload('patios').where('identificacion', idVigilado).first()
 
@@ -575,14 +575,14 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       patios: usuario?.patios ?? [],
       plantilla: `/inidicador/plantillas/placas-patios.xlsx`,
       cargados: `/exportar/vehiculos-patios?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`,
-      mensaje: visible?.mensaje
+      mensaje: visible?.mensaje?? ''
     }
 
   }
 
   async empresas(params: any): Promise<any> {
     const { idVigilado, idMes, vigencia } = params;
-    const visible = await TblVehiculosMeses.query().select('vem_estado').where({ 'vem_mes': idMes, 'vem_tipo': 2 }).first()
+    const visible = await TblVehiculosMeses.query().where({ 'vem_mes': idMes, 'vem_tipo': 2 }).first()
     const usuario = await TblUsuarios.query().preload('empresas').where('identificacion', idVigilado).first()
 
     return {
@@ -590,7 +590,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       empresas: usuario?.empresas ?? [],
       plantilla: `/inidicador/plantillas/placas-empresa.xlsx`,
       cargados: `/exportar/vehiculos-modalidades?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`,
-      mensaje: visible?.mensaje
+      mensaje: visible?.mensaje?? ''
     }
 
   }
