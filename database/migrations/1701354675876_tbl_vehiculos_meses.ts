@@ -9,6 +9,7 @@ export default class extends BaseSchema {
       table.integer('vem_tipo')
       table.integer('vem_mes')
       table.boolean('vem_estado')
+      table.string('vem_mensaje')
     })
   }
 
