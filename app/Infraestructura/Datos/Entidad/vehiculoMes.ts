@@ -8,7 +8,8 @@ export class TblVehiculosMeses extends BaseModel {
   public mes: number; 
   @column({ columnName: 'vem_estado' })
   public estado: boolean; 
-
+  @column({ columnName: 'vem_mensaje' })
+  public mensaje: string; 
 }
 
 
