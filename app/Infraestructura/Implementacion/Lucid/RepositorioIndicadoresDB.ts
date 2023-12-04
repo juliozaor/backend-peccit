@@ -20,7 +20,7 @@ import Env from '@ioc:Adonis/Core/Env';
 import { TblEstadosReportes } from 'App/Infraestructura/Datos/Entidad/EstadosReportes';
 import { TblVehiculosPatios } from 'App/Infraestructura/Datos/Entidad/vehiculosPatios';
 import { TblVehiculosModalidades } from 'App/Infraestructura/Datos/Entidad/vehiculosModalidades';
-import { TblVehiculosMeses } from 'App/Infraestructura/Datos/Entidad/vehiculoMes';
+import { TblVehiculosMeses } from 'App/Infraestructura/Datos/Entidad/VehiculoMes';
 
 export class RepositorioIndicadoresDB implements RepositorioIndicador {
   private servicioAuditoria = new ServicioAuditoria();
