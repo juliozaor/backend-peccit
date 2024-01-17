@@ -75,7 +75,7 @@ export class Soporte{
         const anio = DateTime.now().year
         //logica para generar radicado
         const consecutivo = String(this.id).padStart(6, '0')
-        this.radicado = `PESV${anio}${consecutivo}`
+        this.radicado = `PECCIT${anio}${consecutivo}`
         return this.radicado
     }
 }
