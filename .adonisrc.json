@@ -40,7 +40,9 @@
     "./start/Rutas/ruta_reporta_municipios",
     "./start/Rutas/ruta_meses",
     "./start/Rutas/ruta_vigencias",
-    "./start/Rutas/ruta_tarifa"
+    "./start/Rutas/ruta_tarifa",
+    "./start/Rutas/ruta_mes_patio_modalidad"
+
   ],
   "providers": [
     "./providers/AppProvider",

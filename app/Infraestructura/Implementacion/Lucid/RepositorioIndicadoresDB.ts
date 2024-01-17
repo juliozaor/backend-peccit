@@ -20,7 +20,7 @@ import Env from '@ioc:Adonis/Core/Env';
 import { TblEstadosReportes } from 'App/Infraestructura/Datos/Entidad/EstadosReportes';
 import { TblVehiculosPatios } from 'App/Infraestructura/Datos/Entidad/vehiculosPatios';
 import { TblVehiculosModalidades } from 'App/Infraestructura/Datos/Entidad/vehiculosModalidades';
-import { TblVehiculosMeses } from 'App/Infraestructura/Datos/Entidad/vehiculoMes';
+import { TblVehiculosMeses } from 'App/Infraestructura/Datos/Entidad/VehiculoMes';
 
 export class RepositorioIndicadoresDB implements RepositorioIndicador {
   private servicioAuditoria = new ServicioAuditoria();
@@ -566,7 +566,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     const { idVigilado, idMes, vigencia } = params;
     // id : 1
 
-    const visible = await TblVehiculosMeses.query().select('vem_estado').where({ 'vem_mes': idMes, 'vem_tipo': 1 }).first()
+    const visible = await TblVehiculosMeses.query().where({ 'vem_mes': idMes, 'vem_tipo': 1 }).first()
 
     const usuario = await TblUsuarios.query().preload('patios').where('identificacion', idVigilado).first()
 
@@ -574,21 +574,23 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       visible: visible?.estado ?? false,
       patios: usuario?.patios ?? [],
       plantilla: `/inidicador/plantillas/placas-patios.xlsx`,
-      cargados: `/exportar/vehiculos-patios?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`
+      cargados: `/exportar/vehiculos-patios?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`,
+      mensaje: visible?.mensaje?? ''
     }
 
   }
 
   async empresas(params: any): Promise<any> {
     const { idVigilado, idMes, vigencia } = params;
-    const visible = await TblVehiculosMeses.query().select('vem_estado').where({ 'vem_mes': idMes, 'vem_tipo': 2 }).first()
+    const visible = await TblVehiculosMeses.query().where({ 'vem_mes': idMes, 'vem_tipo': 2 }).first()
     const usuario = await TblUsuarios.query().preload('empresas').where('identificacion', idVigilado).first()
 
     return {
       visible: visible?.estado ?? false,
       empresas: usuario?.empresas ?? [],
       plantilla: `/inidicador/plantillas/placas-empresa.xlsx`,
-      cargados: `/exportar/vehiculos-modalidades?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`
+      cargados: `/exportar/vehiculos-modalidades?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`,
+      mensaje: visible?.mensaje?? ''
     }
 
   }

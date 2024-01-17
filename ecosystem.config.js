@@ -7,6 +7,14 @@ module.exports = {
         repo : 'https://github.com/juliozaor/backend-peccit.git',
         path : '/var/peccit/backend_core',
         'post-deploy': 'npm install && npm run build && cp .env build/.env && cd build && npm ci --production && pm2 restart backend_core',
+      },
+      qa : {
+        user : 'root',
+        host : 'supertransporte_qa',
+        ref  : 'origin/dev',
+        repo : 'https://github.com/juliozaor/backend-peccit.git',
+        path : '/var/peccit/backend_core',
+        'post-deploy': 'npm install && npm run build && cp .env build/.env && cd build && npm ci --production && pm2 restart backend-peccit',
       }
     }
   };
