@@ -70,7 +70,7 @@ export class ServicioImportarVehiculos {
     let resultado: Resultado<ErrorFormatoImportarExcel[]>
     let libro = new Excel.Workbook()
     libro = await libro.xlsx.readFile(filelocation)
-    let hoja = libro.getWorksheet('Hoja1') // get sheet name
+    let hoja = libro.getWorksheet('Hoja1')! // get sheet name
     let colComment = hoja.getColumn('A') //column name
     if (tipo == 1) {
       return this.importPatios(colComment, idVigilado, hoja, vigencia, mes);
