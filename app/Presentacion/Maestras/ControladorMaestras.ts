@@ -67,11 +67,14 @@ export default class ControladorReporte {
       const payload = await request.obtenerPayloadJWT();
       //const usuario = await TblUsuarios.findByOrFail('usn_usuario', payload.documento);
       const usuario = await TblUsuarios.query().preload('reportaMunicipio').where('usn_usuario', payload.documento).first();
+      
       const idMunicipios = new Array();
      // consulta.where('id', usuario.municipioId!)
      usuario?.reportaMunicipio.forEach(elemento => {      
       idMunicipios.push(elemento.municipio);
      });     
+     idMunicipios.push(usuario?.municipioId);
+
       consulta.whereIn('id', idMunicipios)
 
     }
