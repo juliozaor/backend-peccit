@@ -39,7 +39,8 @@ export default class ControladorReporte {
     const meses = mesesSql.map(m => {
       return {
         idMes: m.id,
-        nombreMes: m.nombre
+        nombreMes: m.nombre,
+        idMostrar: m.visual
       }
     })
     response.status(200).send({ meses })
@@ -73,7 +74,9 @@ export default class ControladorReporte {
      usuario?.reportaMunicipio.forEach(elemento => {      
       idMunicipios.push(elemento.municipio);
      });     
+     if(usuario?.reportaMunicipio.length == 0){
      idMunicipios.push(usuario?.municipioId);
+     }
 
       consulta.whereIn('id', idMunicipios)
 

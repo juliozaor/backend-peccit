@@ -21,6 +21,7 @@ import { TblEstadosReportes } from 'App/Infraestructura/Datos/Entidad/EstadosRep
 import { TblVehiculosPatios } from 'App/Infraestructura/Datos/Entidad/vehiculosPatios';
 import { TblVehiculosModalidades } from 'App/Infraestructura/Datos/Entidad/vehiculosModalidades';
 import { TblVehiculosMeses } from 'App/Infraestructura/Datos/Entidad/VehiculoMes';
+import { TblMeses } from 'App/Infraestructura/Datos/Entidad/Mes';
 
 export class RepositorioIndicadoresDB implements RepositorioIndicador {
   private servicioAuditoria = new ServicioAuditoria();
@@ -386,9 +387,13 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
          mensaje: "No se encontro una planeación para este usuario",
        }
      } */
+
+     const {visual} = await TblMeses.findOrFail(idMes);
+
+
     //Buscar el estado por la nueva tabla
     const estadoreportes = await TblEstadosReportes.query()
-      .where({ 'reporte': idReporte, 'vigencia': reporte.anioVigencia, 'mes': idMes })
+      .where({ 'reporte': idReporte, 'vigencia': reporte.anioVigencia, 'mes': visual })
       .orderBy('created_at', 'desc')
       .first();
 
@@ -396,7 +401,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       const newEstadoReporte = new TblEstadosReportes()
       newEstadoReporte.reporte = idReporte
       newEstadoReporte.vigencia = reporte.anioVigencia!
-      newEstadoReporte.mes = idMes
+      newEstadoReporte.mes = visual
       newEstadoReporte.estado = 1002
       newEstadoReporte.save()
     }
@@ -410,9 +415,9 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
             detalle.where('ddt_reporte_id', idReporte)
           })
           datos.where('dai_visible', true)
-          datos.where('dai_meses', idMes)
+          datos.where('dai_meses', visual)
         }).whereHas('datosIndicadores', datos => {
-          datos.where('dai_meses', idMes)
+          datos.where('dai_meses', visual)
         })
 
 
@@ -421,9 +426,9 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
           datos.preload('detalleDatos', detalle => {
             detalle.where('ddt_reporte_id', idReporte)
           })
-          datos.where('dai_meses', idMes)
+          datos.where('dai_meses', visual)
         }).whereHas('datosIndicadores', datos => {
-          datos.where('dai_meses', idMes)
+          datos.where('dai_meses', visual)
         })
 
 
@@ -442,10 +447,10 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
             detalleV.where('dda_reporte_id', idReporte)
           })
           sqlDatosE.where('dad_visible', true)
-          sqlDatosE.where('dad_meses', idMes)
+          sqlDatosE.where('dad_meses', visual)
 
         }).whereHas('datosAdicionales', sqlDatosE => {
-          sqlDatosE.where('dad_meses', idMes)
+          sqlDatosE.where('dad_meses', visual)
         }).preload('subTipoDato', sqlSubTipoDato => {
           sqlSubTipoDato.preload('tipoDato')
         })
@@ -455,9 +460,9 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
           sqlDatosE.preload('detalleAdicional', detalleV => {
             detalleV.where('dda_reporte_id', idReporte)
           })
-          sqlDatosE.where('dad_meses', idMes)
+          sqlDatosE.where('dad_meses', visual)
         }).whereHas('datosAdicionales', sqlDatosE => {
-          sqlDatosE.where('dad_meses', idMes)
+          sqlDatosE.where('dad_meses', visual)
         }).preload('subTipoDato', sqlSubTipoDato => {
           sqlSubTipoDato.preload('tipoDato')
         })
@@ -557,7 +562,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       idEncuesta: 3,
       vigencia,
       soloLectura,
-      mes: idMes,
+      mes: visual,
       formularios
     }
   }
@@ -566,7 +571,9 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
     const { idVigilado, idMes, vigencia } = params;
     // id : 1
 
-    const visible = await TblVehiculosMeses.query().where({ 'vem_mes': idMes, 'vem_tipo': 1 }).first()
+    const {visual} = await TblMeses.findOrFail(idMes);
+
+    const visible = await TblVehiculosMeses.query().where({ 'vem_mes': visual, 'vem_tipo': 1 }).first()
 
     const usuario = await TblUsuarios.query().preload('patios').where('identificacion', idVigilado).first()
 
@@ -574,7 +581,7 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
       visible: visible?.estado ?? false,
       patios: usuario?.patios ?? [],
       plantilla: `/inidicador/plantillas/placas-patios.xlsx`,
-      cargados: `/exportar/vehiculos-patios?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`,
+      cargados: `/exportar/vehiculos-patios?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${visual}`,
       mensaje: visible?.mensaje?? ''
     }
 
@@ -582,14 +589,15 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
   async empresas(params: any): Promise<any> {
     const { idVigilado, idMes, vigencia } = params;
-    const visible = await TblVehiculosMeses.query().where({ 'vem_mes': idMes, 'vem_tipo': 2 }).first()
+    const {visual} = await TblMeses.findOrFail(idMes);
+    const visible = await TblVehiculosMeses.query().where({ 'vem_mes': visual, 'vem_tipo': 2 }).first()
     const usuario = await TblUsuarios.query().preload('empresas').where('identificacion', idVigilado).first()
 
     return {
       visible: visible?.estado ?? false,
       empresas: usuario?.empresas ?? [],
       plantilla: `/inidicador/plantillas/placas-empresa.xlsx`,
-      cargados: `/exportar/vehiculos-modalidades?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${idMes}`,
+      cargados: `/exportar/vehiculos-modalidades?idVigilado=${idVigilado}&vigencia=${vigencia}&idMes=${visual}`,
       mensaje: visible?.mensaje?? ''
     }
 
@@ -597,9 +605,10 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
   async guardarEjecucion(datos: string, documento: string): Promise<any> {
     const { respuestasActividades, reporteId, adicionales, mesId } = JSON.parse(datos);
+    const {visual} = await TblMeses.findOrFail(mesId);
 
     const { anioVigencia, idEncuesta } = await TblReporte.findByOrFail('id', reporteId)
-    this.servicioEstado.estadoReporte(reporteId, anioVigencia ?? 2023, mesId, 1003, null)
+    this.servicioEstado.estadoReporte(reporteId, anioVigencia ?? 2023, visual, 1003, null)
     for await (const respuesta of respuestasActividades) {
 
       const existeDatos = await TblDetalleDatos.query().where({ 'ddt_dato_indicador_id': respuesta.preguntaId, 'ddt_reporte_id': reporteId }).first()
