@@ -792,8 +792,9 @@ export class RepositorioIndicadoresDB implements RepositorioIndicador {
 
 
     if (aprobado) {
+      const {visual} = await TblMeses.findOrFail(idMes);
       /*  this.servicioEstado.Log(idUsuario, 1007, reportes?.idEncuesta) */
-      this.servicioEstado.estadoReporte(idReporte, indicadores.vigencia, idMes, 1004, DateTime.fromJSDate(new Date()))
+      this.servicioEstado.estadoReporte(idReporte, indicadores.vigencia, visual, 1004, DateTime.fromJSDate(new Date()))
       /*   const reporte = await TblReporte.findOrFail(idReporte)
         reporte.fechaEnviostEjecucion = DateTime.fromJSDate(new Date())
         reporte.envioStEjecucion = '1'
