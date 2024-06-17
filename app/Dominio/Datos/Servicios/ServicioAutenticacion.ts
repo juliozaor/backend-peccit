@@ -91,6 +91,8 @@ export class ServicioAutenticacion {
          this.manejarIntentoFallido(registroDeBloqueo)
          this.servicioEstado.Log(usuario, 1011)
          throw new Exception('Credenciales incorrectas, por favor intente recuperar contraseña con su correo registrado en Vigia', 400)
+        }
+      }
       
 
   /*   if (!await this.encriptador.comparar(contrasena, usuarioVerificado.clave)) {
