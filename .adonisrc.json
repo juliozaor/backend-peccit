@@ -41,6 +41,7 @@
     "./start/Rutas/ruta_meses",
     "./start/Rutas/ruta_vigencias",
     "./start/Rutas/ruta_tarifa",
+    "./start/Rutas/ruta_informes",
     "./start/Rutas/ruta_mes_patio_modalidad"
 
   ],
