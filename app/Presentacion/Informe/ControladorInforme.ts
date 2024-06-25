@@ -179,7 +179,7 @@ const cabeceras = [
         const estadoReportes = await TblEstadosReportes.query().where(
           "reporte",
           reportef2.id!
-        );
+        ).andWhere('estado',1004);
 
         mesesActivos.forEach((mes) => {
           const estado = estadoReportes.find((e) => e.mes == mes)?.estado;
