@@ -121,7 +121,6 @@ const cabeceras = [
   public async obtenerEstado({ request, response }: HttpContextContract) {
     const { nit } = request.all();
     let estadoFase1 = false;
-    let estadoFase2 = false;
     let estadoEjecucion = false
 
     const fase1 = await TblReporte.query()
@@ -130,17 +129,18 @@ const cabeceras = [
       .select("estado_verificacion_id")
       .first();
 
+
     if (fase1) {
       if (
-        fase1.estadoVerificacionId == 1003 ||
+        fase1.estadoVerificacionId == 1007 ||
         fase1.estadoVerificacionId == 1004 ||
-        fase1.estadoVerificacionId == 1005
+        fase1.estadoVerificacionId == 1009
       ) {
         estadoFase1 = true;
       }
     }
 
-    const fase2 = await TblReporte.query()
+ /*    const fase2 = await TblReporte.query()
       .where("login_vigilado", nit)
       .andWhere("id_encuesta", 2)
       .select("estado_verificacion_id")
@@ -154,7 +154,7 @@ const cabeceras = [
       ) {
         estadoFase2 = true;
       }
-    }
+    } */
 
     const vigencia = await TblVigencias.query()
       .where("anv_estado", true)
@@ -175,6 +175,7 @@ const cabeceras = [
         .andWhere("anio_vigencia", vigencia.anio)
         .first();
 
+
       if (reportef2) {
         const estadoReportes = await TblEstadosReportes.query().where(
           "reporte",
@@ -192,6 +193,6 @@ const cabeceras = [
       }
     }
 
-    return estadoFase1 && estadoEjecucion && estadoFase2;
+    return estadoFase1 && estadoEjecucion;
   }
 }
