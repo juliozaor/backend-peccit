@@ -73,4 +73,12 @@ export class ServicioUsuarios {
     usuario.estado = !usuario.estado
     return await this.repositorio.actualizarUsuario(id, usuario);
   }
+
+  async guardarUsuarioVigia(usuario: Usuario): Promise<Usuario> {
+   
+    usuario.id = uuidv4();
+    usuario.usuario = usuario.identificacion.toString()
+    const user = this.repositorio.guardarUsuario(usuario); 
+    return user
+  }
 }

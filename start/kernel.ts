@@ -42,5 +42,6 @@ Server.middleware.register([
 */
 Server.middleware.registerNamed({
   autenticacionJwt : () => import('App/Middlewares/AuntenticacionJWT'),
-  administrador: ()=> import('App/Middlewares/AutenticarAdministrador')
+  administrador: ()=> import('App/Middlewares/AutenticarAdministrador'),
+  autenticacionVigia: () => import('App/Middlewares/AutenticacionVigia') 
 })
