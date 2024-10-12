@@ -12,6 +12,9 @@ import TblUsuarios from 'App/Infraestructura/Datos/Entidad/Usuario';
 import { TblSedesOperativas } from 'App/Infraestructura/Datos/Entidad/SedesOperativas';
 import { TblPatios } from 'App/Infraestructura/Datos/Entidad/Patios';
 import { TblEmpresas } from 'App/Infraestructura/Datos/Entidad/Empresas';
+import axios from 'axios'; 
+import Env from '@ioc:Adonis/Core/Env';
+
 export class RepositorioRespuestasDB implements RepositorioRespuesta {
   private servicioAuditoria = new ServicioAuditoria();
   private servicioEstado = new ServicioEstados();
@@ -23,6 +26,9 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
     const { usuarioCreacion, loginVigilado, idEncuesta, estadoVerificacionId } = await TblReporte.findByOrFail('id', idReporte)
 
     let estado = 1003
+    let array_msn: string[] = [];
+    let valido = true;
+    let msntemp:string = "";
 
     if (estadoVerificacionId === 7 || estadoVerificacionId === 1005) 
     {
@@ -75,6 +81,8 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
     for await (const empresa of guardarEmpresas)
     {
+      valido = true;
+
       const datosEmpresa = {
                 nit: empresa.nit,
                 razonSocial: empresa.razon_social,
@@ -88,6 +96,7 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
                 originalTransportadora: empresa.original_transportadora,
                 rutaTransportadora: empresa.ruta_transportadora,
                 documentoTransportadora: empresa.documento_transportadora,
+                correoelectronico:empresa.correoelectronico,
                 estado: empresa.estado,
                 usuarioId: empresa.usuario_id,
                 departamento: empresa.departamento,
@@ -105,7 +114,59 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
       }
       else
       {
-        const a = await TblEmpresas.create(datosEmpresa);   
+
+        const output_rues = await this.validarRues(empresa.nit);
+        const output_vigia = await this.validarVigia(empresa.nit);
+
+        if ( output_rues.status == 200 && output_vigia.status == 200)
+        {
+            if (output_rues.out.registros.length == 0)
+            {
+                msntemp = "La emprese no encuentra registrada en el RUES";
+                array_msn.push(msntemp);
+                valido = false;
+            }
+
+            if (output_vigia.out == null)
+            {
+                msntemp = 'La emprese no encuentra registrada en el VIGIA';
+                array_msn.push(msntemp);
+                valido = false;
+            }
+        }
+        else
+        {
+          valido = false;
+        }
+
+        const output_poliza = await this.validarPoliza(empresa.nit);
+
+        if (output_poliza.status == 200 && output_poliza.polizas.length == 0)
+        {
+            msntemp = "La empresa debe reportar las pólizas";
+            array_msn.push(msntemp);
+        }
+
+        if (valido)
+        {
+          const a = await TblEmpresas.create(datosEmpresa);
+
+          const obj_usuario = {
+              usuario: "Usuario", // Se autogenera en backend polizas utilizando el nit de la empresa
+              identificacion: datosEmpresa.nit,
+              nombre: datosEmpresa.razonSocial,
+              apellido: null,
+              fechaNacimiento: null,
+              cargo: null,
+              correo: datosEmpresa.correoelectronico,
+              telefono: null,
+              estado: true,
+              clave: "Clave", // Se autogenera en backend polizas
+              claveTemporal: true
+          };
+
+          const out_usuario = await this.crearUsuariopolizas(obj_usuario);
+        }
       }
     }
 
@@ -172,7 +233,12 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
     }
 
     return {
-      mensaje: "Encuesta guardada correctamente"
+      mensaje: "Encuesta guardada correctamente",
+      out_empresa: {
+        msn: valido ? 'La empresa fue registrada correctamente' : 'No fue posible agregar la empresa',
+        array_errors: array_msn,
+        status: valido? 200 : 409
+      }
     }
   }
 
@@ -258,5 +324,116 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
   }
 
+  public async validarVigia(nit:string){
+    try
+    {
+        const apiResponse = await axios.get(Env.get('URL_VIGIA')+'/vista', {
+            params: {
+              documento: nit, // Parámetro del documento en la URL
+            },
+            headers: {
+              Authorization: 'Bearer 2c9b417a-75af-46c5-8ca0-340d3acdb3c7', // Token Bearer
+              'Content-Type': 'application/json',
+            },
+          });
 
+        return {
+            out: apiResponse.data,
+            status: 200,
+            msn: 'Consulta exitosa en VIGIA'
+        };
+    } 
+    catch (error)
+    {
+        return {
+            out: null,
+            status: 500,
+            msn: 'Error al consulta VIGIA'
+        };
+    }
+}
+
+public async validarPoliza(nit:string){
+    try
+    {
+        const apiResponse = await axios.get(Env.get('URL_POLIZAS')+'/poliza/usuario', {
+            params: {
+              documento: nit, // Parámetro del documento en la URL
+            },
+            headers: {
+              Authorization: 'Bearer 2c9b417a-75af-46c5-8ca0-340d3acdb3c7', // Token Bearer
+              'Content-Type': 'application/json',
+            },
+          });
+
+        return {
+            out: apiResponse.data,
+            status: 200,
+            msn: 'Consulta exitosa en Polizas'
+        };
+    } 
+    catch (error)
+    {
+        return {
+            out: null,
+            status: 500,
+            msn: 'Error al consulta Polizas'
+        };
+    }
+}
+
+public async validarRues(nit:number){
+    try
+    {
+        const apiResponse = await axios.post(Env.get('URL_RUES')+'/getConfecamaras', {
+                document: (nit), // Parámetro del documento en la URL
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+        return {
+            out: apiResponse.data,
+            status: 200,
+            msn: 'Consulta exitosa en RUES'
+        };
+    } 
+    catch (error)
+    {
+        return {
+            out: null,
+            status: 500,
+            msn: 'Error al consulta VIGIA'
+        };
+    }
+  }
+
+  public async crearUsuariopolizas(obj_usuario:any){
+    try
+    {
+        const apiResponse = await axios.post(Env.get('URL_POLIZAS')+'/registropeccit',
+            obj_usuario,
+            {
+              headers: {
+                  'Content-Type': 'application/json',
+              }
+            }
+        );
+
+        return {
+            out: apiResponse.data,
+            status: 200,
+            msn: 'Usuario creado exitosamente'
+        };
+    } 
+    catch (error)
+    {
+        return {
+            out: null,
+            status: 500,
+            msn: 'Error al crear usuario en polizas'
+        };
+    }
+  }
 }
