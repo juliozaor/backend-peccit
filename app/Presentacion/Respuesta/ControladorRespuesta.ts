@@ -19,9 +19,7 @@ export default class ControladorRespuesta {
     const {idReporte} = params
     const payload = await request.obtenerPayloadJWT()
     const respuesta = await this.service.guardar(JSON.stringify(request.all()), idReporte, payload )
-  /*   response.status(200).send({
-      mensaje: "Encuesta guardada correctamente"
-    }) */
+    
     response.status(200).send(respuesta) 
   }
 

@@ -1,17 +1,18 @@
 import BaseSchema from '@ioc:Adonis/Lucid/Schema'
 
 export default class extends BaseSchema {
-  protected tableName = 'soporte'
+
+  protected tableName = 'tbl_empresas'
 
   public async up () {
     this.schema.alterTable(this.tableName, (table) => {
-      table.string('error_acceso', 20)
+      table.string('correoelectronico')
     })
   }
 
   public async down () {
     this.schema.alterTable(this.tableName, (table) => {
-      table.dropColumn('error_acceso')
+      table.dropColumn('correoelectronico')
     })
   }
 }
