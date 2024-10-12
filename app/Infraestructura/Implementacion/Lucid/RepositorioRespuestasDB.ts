@@ -114,40 +114,9 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
       }
       else
       {
+        const out_validacion =  await this.validacionRVP(empresa.nit);
 
-        const output_rues = await this.validarRues(empresa.nit);
-        const output_vigia = await this.validarVigia(empresa.nit);
-
-        if ( output_rues.status == 200 && output_vigia.status == 200)
-        {
-            if (output_rues.out.registros.length == 0)
-            {
-                msntemp = "La emprese no encuentra registrada en el RUES";
-                array_msn.push(msntemp);
-                valido = false;
-            }
-
-            if (output_vigia.out == null)
-            {
-                msntemp = 'La emprese no encuentra registrada en el VIGIA';
-                array_msn.push(msntemp);
-                valido = false;
-            }
-        }
-        else
-        {
-          valido = false;
-        }
-
-        const output_poliza = await this.validarPoliza(empresa.nit);
-
-        if (output_poliza.status == 200 && output_poliza.out.polizas.length == 0)
-        {
-            msntemp = "La empresa debe reportar las pólizas";
-            array_msn.push(msntemp);
-        }
-
-        if (valido)
+        if (out_validacion.status)
         {
           const a = await TblEmpresas.create(datosEmpresa);
 
@@ -324,6 +293,50 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
   }
 
+  public async validacionRVP(nit:string)
+  {
+    let array_msn: string[] = [];
+    let valido = true;
+    let msntemp:string = "";
+
+    const output_rues = await this.validarRues(nit);
+    const output_vigia = await this.validarVigia(nit);
+
+    if ( output_rues.status == 200 && output_vigia.status == 200)
+    {
+        if (output_rues.out.registros.length == 0)
+        {
+            msntemp = "La emprese no encuentra registrada en el RUES";
+            array_msn.push(msntemp);
+            valido = false;
+        }
+
+        if (output_vigia.out == null)
+        {
+            msntemp = 'La emprese no encuentra registrada en el VIGIA';
+            array_msn.push(msntemp);
+            valido = false;
+        }
+    }
+    else
+    {
+      valido = false;
+    }
+
+    const output_poliza = await this.validarPoliza(nit);
+
+    if (output_poliza.status == 200 && output_poliza.out.polizas.length == 0)
+    {
+        msntemp = "La empresa debe reportar las pólizas";
+        array_msn.push(msntemp);
+    }
+
+     return {
+         status: valido,
+         array_msn:array_msn
+     }
+  }
+
   public async validarVigia(nit:string){
     try
     {
@@ -382,7 +395,7 @@ public async validarPoliza(nit:string){
     }
 }
 
-public async validarRues(nit:number){
+public async validarRues(nit:string){
     try
     {
         const apiResponse = await axios.post(Env.get('URL_RUES')+'/getConfecamaras', {

@@ -5,4 +5,6 @@ Route.group(() => {
   Route.post('/verificar', accion_path + '.verificar')  
   Route.post('/finalizar-verificacion', accion_path + '.finalizar')  
   Route.post('/:idReporte', accion_path + '.guardar')  
+  Route.get('/validacionrvp', accion_path + '.validacionRVP')  
+
 }).prefix('api/v1/respuestas').middleware('autenticacionJwt')
