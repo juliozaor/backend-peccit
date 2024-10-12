@@ -293,41 +293,32 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
   }
 
-  public async validacionRVP(datos:string)
+  public async validacionRVP(nit:string)
   {
-    const { nit } = JSON.parse(datos);
-
     let array_msn: string[] = [];
     let valido = true;
     let msntemp:string = "";
 
-    const output_rues = await this.validarRues(nit);
+    const output_rues = await this.validarRues(parseInt(nit));
     const output_vigia = await this.validarVigia(nit);
 
-    if ( output_rues.status == 200 && output_vigia.status == 200)
+    if (!output_rues.out.hasOwnProperty('registros'))
     {
-        if (output_rues.out.registros.length == 0)
-        {
-            msntemp = "La emprese no encuentra registrada en el RUES";
-            array_msn.push(msntemp);
-            valido = false;
-        }
-
-        if (output_vigia.out == null)
-        {
-            msntemp = 'La emprese no encuentra registrada en el VIGIA';
-            array_msn.push(msntemp);
-            valido = false;
-        }
+        msntemp = "La emprese no encuentra registrada en el RUES";
+        array_msn.push(msntemp);
+        valido = false;
     }
-    else
+
+    if (output_vigia.out.code == "ERR_BAD_REQUEST")
     {
-      valido = false;
+        msntemp = 'La emprese no encuentra registrada en el VIGIA';
+        array_msn.push(msntemp);
+        valido = false;
     }
 
     const output_poliza = await this.validarPoliza(nit);
 
-    if (output_poliza.status == 200 && output_poliza.out.polizas.length == 0)
+    if (output_poliza.out.code == "ERR_BAD_REQUEST")
     {
         msntemp = "La empresa debe reportar las pólizas";
         array_msn.push(msntemp);
@@ -335,7 +326,7 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
      return {
          status: valido,
-         array_msn:array_msn
+         array_msn:array_msn,
      }
   }
 
@@ -361,8 +352,7 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
     catch (error)
     {
         return {
-            out: null,
-            status: 500,
+            out: error,
             msn: 'Error al consulta VIGIA'
         };
     }
@@ -390,7 +380,7 @@ public async validarPoliza(nit:string){
     catch (error)
     {
         return {
-            out: null,
+            out: error,
             status: 500,
             msn: 'Error al consulta Polizas'
         };
