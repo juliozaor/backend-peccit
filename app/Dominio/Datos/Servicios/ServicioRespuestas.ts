@@ -22,6 +22,7 @@ export class ServicioRespuestas {
     if(payload.idRol !== '002'){
       throw new Error("Usted no tiene autorización para hacer una verificación");      
     }
+
     return this.repositorio.validacionRVP(nit);
   }
 

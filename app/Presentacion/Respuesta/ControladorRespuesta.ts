@@ -23,9 +23,10 @@ export default class ControladorRespuesta {
     response.status(200).send(respuesta) 
   }
 
-  public async validacionrvp({ request }:HttpContextContract) {
+  public async validacionrvp({ request, response, params }:HttpContextContract) {
+    const {nit} = params;
     const payload = await request.obtenerPayloadJWT()
-    return this.service.validacionRVP(JSON.stringify(request.all()), payload);
+    return this.service.validacionRVP(nit, payload);
   }
 
   public async verificar({ request }:HttpContextContract) {
