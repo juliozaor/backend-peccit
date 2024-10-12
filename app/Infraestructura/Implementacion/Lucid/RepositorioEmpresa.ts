@@ -9,6 +9,9 @@ export class RepositorioEmpresa implements RepositorioEmpresaInterface
             let query = TblEmpresas.query();
     
             query.leftJoin('tbl_servicios_modalidades',  'tbl_empresas.emp_tipo_servicio', 'tbl_servicios_modalidades.smo_id');
+            query.leftJoin('tbl_ciudades',  'tbl_empresas.emp_municipio', 'tbl_ciudades.id');
+            query.leftJoin('tbl_departamentos',  'tbl_empresas.emp_departamento', 'tbl_departamentos.id');
+
             query.where('tbl_empresas.emp_usuario_id', obj_filter.usuario_id);
 
             if (obj_filter.find && obj_filter.find.trim().length > 0)
@@ -23,7 +26,7 @@ export class RepositorioEmpresa implements RepositorioEmpresaInterface
                     query.orWhere('tbl_servicios_modalidades.smo_nombre', 'ILIKE', `%${obj_filter.find}%`);
                 }
             }
-    
+
             query.select("tbl_empresas.emp_nit",
                         "tbl_empresas.emp_razon_social",
                         "tbl_empresas.emp_tipo_servicio",
@@ -44,6 +47,8 @@ export class RepositorioEmpresa implements RepositorioEmpresaInterface
                         "tbl_empresas.emp_usuario_id",
                         "tbl_empresas.emp_departamento",
                         "tbl_empresas.emp_municipio",
+                        "tbl_ciudades.name as ciudad_nombre",
+                        "tbl_departamentos.name as departamento_nombre",
                         "tbl_empresas.correoelectronico"
                         );
     
