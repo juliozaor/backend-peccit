@@ -19,10 +19,6 @@ export class ServicioRespuestas {
   }
 
   async validacionRVP(nit: string, payload:PayloadJWT): Promise<any> {
-    if(payload.idRol !== '002'){
-      throw new Error("Usted no tiene autorización para hacer una verificación");      
-    }
-
     return this.repositorio.validacionRVP(nit);
   }
 
