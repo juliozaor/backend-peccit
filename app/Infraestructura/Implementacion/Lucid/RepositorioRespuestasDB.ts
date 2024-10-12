@@ -293,8 +293,10 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
   }
 
-  public async validacionRVP(nit:string)
+  public async validacionRVP(datos:string)
   {
+    const { nit } = JSON.parse(datos);
+
     let array_msn: string[] = [];
     let valido = true;
     let msntemp:string = "";
