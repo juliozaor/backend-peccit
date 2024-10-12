@@ -49,7 +49,10 @@ export class TblEmpresas extends BaseModel {
   public smo_nombre: string;
   @column({ columnName: "poliza"})
   public poliza: boolean;
-
+  @column({ columnName: "ciudad_nombre"})
+  public ciudad_nombre: string;
+  @column({ columnName: "departamento_nombre"})
+  public departamento_nombre: string;
   public estableceEmpresaConId(empresa: Empresa) {
     this.razonSocial = empresa.razonSocial
     this.tipoServicio = empresa.tipoServicio
