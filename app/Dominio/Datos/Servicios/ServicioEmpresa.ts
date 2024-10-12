@@ -56,7 +56,7 @@ export class ServicioEmpresa {
     public async listarpoliza(query: any) {
         try
         {
-            const apiResponse = await axios.get(Env.get('URL_POLIZAS')+'/poliza/filtrarPolizas', {
+            const apiResponse = await axios.get(Env.get('URL_POLIZAS')+'/filtrarPolizas', {
                 params: {
                     usn_identificacion: query.usn_identificacion, // Parámetro del documento en la URL
                     pol_numero: query.pol_numero,
