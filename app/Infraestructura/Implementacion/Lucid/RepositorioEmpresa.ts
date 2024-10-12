@@ -9,12 +9,13 @@ export class RepositorioEmpresa implements RepositorioEmpresaInterface
             let query = TblEmpresas.query();
     
             query.leftJoin('tbl_servicios_modalidades',  'tbl_empresas.emp_tipo_servicio', 'tbl_servicios_modalidades.smo_id');
-    
+            query.where('tbl_empresas.emp_usuario_id', obj_filter.usuario_id);
+
             if (obj_filter.find && obj_filter.find.trim().length > 0)
             {
                 if (!isNaN(obj_filter.find))
                 {
-                    query.where('tbl_empresas.emp_nit', 'ILIKE', `%${obj_filter.find}%`);
+                    query.whereRaw(`tbl_empresas.emp_nit::TEXT ILIKE ?`, [`%${obj_filter.find}%`]);
                 }
                 else
                 {
@@ -51,7 +52,8 @@ export class RepositorioEmpresa implements RepositorioEmpresaInterface
             return array_tipoidentifacion;
         } 
         catch (error) {
-            return { message: 'Error al listar empresas', error };
+            console.log(error);
+            return { message: 'Error rp', error };
         }
     }
     
