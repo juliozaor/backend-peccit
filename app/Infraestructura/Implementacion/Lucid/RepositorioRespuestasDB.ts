@@ -397,7 +397,7 @@ public async validarPoliza(nit:string){
     }
 }
 
-public async validarRues(nit:string){
+public async validarRues(nit:number){
     try
     {
         const apiResponse = await axios.post(Env.get('URL_RUES')+'/getConfecamaras', {
