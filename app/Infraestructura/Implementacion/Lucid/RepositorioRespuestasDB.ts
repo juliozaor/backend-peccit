@@ -304,14 +304,14 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
     if (!output_rues.out.hasOwnProperty('registros'))
     {
-        msntemp = "La emprese no encuentra registrada en el RUES";
+        msntemp = "La empresa no encuentra registrada en el RUES";
         array_msn.push(msntemp);
         valido = false;
     }
 
     if (output_vigia.out.code == "ERR_BAD_REQUEST")
     {
-        msntemp = 'La emprese no encuentra registrada en el VIGIA';
+        msntemp = 'La empresa no encuentra registrada en el VIGIA';
         array_msn.push(msntemp);
         valido = false;
     }
