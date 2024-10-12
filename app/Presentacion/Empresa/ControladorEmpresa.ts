@@ -7,8 +7,15 @@ export default class ControladorEncuesta {
   constructor () {
     this.service = new ServicioEmpresa(new RepositorioEmpresa())
   }
+
   public async listar ({ request, response }:HttpContextContract) {
     const array_empresas = await this.service.listar(request.all())
+    return response.status(200).send(array_empresas);
+  }
+
+
+  public async listarpoliza ({ request, response }:HttpContextContract) {
+    const array_empresas = await this.service.listarpoliza(request.all())
     return response.status(200).send(array_empresas);
   }
 }
