@@ -18,4 +18,9 @@ export default class ControladorEncuesta {
     const array_empresas = await this.service.listarpoliza(request.all())
     return response.status(200).send(array_empresas);
   }
+
+  public async novedadespoliza ({ request, response }:HttpContextContract) {
+    const array_empresas = await this.service.novedadespoliza(request.all())
+    return response.status(200).send(array_empresas);
+  }
 }

@@ -85,4 +85,35 @@ export class ServicioEmpresa {
         }
     }
 
+    public async novedadespoliza(query: any) {
+        try
+        {
+            const apiResponse = await axios.get(Env.get('URL_POLIZAS')+'/novedades_polizapeccit', {
+                params: {
+                    usn_identificacion: query.usn_identificacion, // Parámetro del documento en la URL
+                    pol_numero: query.pol_numero,
+                    limit: query.limit,
+                    page:query.page
+                },
+                headers: {
+                  Authorization: 'Bearer 2c9b417a-75af-46c5-8ca0-340d3acdb3c7', // Token Bearer
+                  'Content-Type': 'application/json',
+                },
+              });
+    
+            return {
+                out: apiResponse.data,
+                status: 200,
+                msn: 'Consulta exitosa en novedades'
+            };
+        } 
+        catch (error)
+        {
+            return {
+                out: error,
+                status: 500,
+                msn: 'Error al consulta novedades'
+            };
+        }
+    }
 }
