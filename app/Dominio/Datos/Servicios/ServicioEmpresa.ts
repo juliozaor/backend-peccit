@@ -90,10 +90,8 @@ export class ServicioEmpresa {
         {
             const apiResponse = await axios.get(Env.get('URL_POLIZAS')+'/novedades_polizapeccit', {
                 params: {
-                    usn_identificacion: query.usn_identificacion, // Parámetro del documento en la URL
-                    pol_numero: query.pol_numero,
-                    limit: query.limit,
-                    page:query.page
+                    poliza: query.poliza,
+                    tipoPoliza: query.tipoPoliza
                 },
                 headers: {
                   Authorization: 'Bearer 2c9b417a-75af-46c5-8ca0-340d3acdb3c7', // Token Bearer
