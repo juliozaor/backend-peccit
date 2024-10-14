@@ -14,6 +14,7 @@ import { TblPatios } from 'App/Infraestructura/Datos/Entidad/Patios';
 import { TblEmpresas } from 'App/Infraestructura/Datos/Entidad/Empresas';
 import axios from 'axios'; 
 import Env from '@ioc:Adonis/Core/Env';
+import Mail from '@ioc:Adonis/Addons/Mail'
 
 export class RepositorioRespuestasDB implements RepositorioRespuesta {
   private servicioAuditoria = new ServicioAuditoria();
@@ -28,7 +29,15 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
     let estado = 1003
     let array_msn: string[] = [];
     let valido = true;
-    let msntemp:string = "";
+    let dataemail:any = { 
+      clave: '', 
+      nombre: '', 
+      usuario: '', 
+      enviarcredenciales: false,
+      textpoliza: 'Debe cargar las polizas en el aplicativo POLIZAS de la superintendencia de transporte',
+      textvigia: 'Debe registrarse en el aplicativo VIGIA de la superintendencia de transporte',
+      logo: Env.get('LOGO') 
+    };
 
     if (estadoVerificacionId === 7 || estadoVerificacionId === 1005) 
     {
@@ -65,7 +74,6 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
         const isPatio = await TblPatios.findOrFail(patio.id);
         isPatio.establecePatioConId(patio)
         isPatio.save()
-        
       }
       else
       {
@@ -104,17 +112,20 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
       }
    
       const isEmpresa = await TblEmpresas.findBy('emp_nit',empresa.nit);
-        
+      
+      const out_validacion =  await this.validacionRVP(empresa.nit);
+
       if (isEmpresa)
       {
         const affectedRows = await TblEmpresas.query()
         .where('emp_nit', empresa.nit)
         .update(datosEmpresa);
-          
+
+        dataemail.enviarcredenciales = false;
       }
       else
       {
-        const out_validacion =  await this.validacionRVP(empresa.nit);
+        valido = out_validacion.status;
 
         if (out_validacion.status)
         {
@@ -131,12 +142,35 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
               telefono: null,
               estado: true,
               clave: "Clave", // Se autogenera en backend polizas
-              claveTemporal: true
+              claveTemporal: true,
+              idRol:'003'
           };
+
+          dataemail.enviarcredenciales = true;
+          dataemail.clave = datosEmpresa.nit;
+          dataemail.usuario = datosEmpresa.nit;
 
           const out_usuario = await this.crearUsuariopolizas(obj_usuario);
         }
       }
+
+      dataemail.nombre = datosEmpresa.razonSocial;
+
+      if (!out_validacion.tienepoliza)
+      {
+          dataemail.textpoliza = '';
+      }
+
+      if (!out_validacion.tienevigia)
+      {
+          dataemail.textvigia = '';
+      }
+
+      await this.enviarCorreo(
+        'Registro de empresa exitoso', 
+        datosEmpresa.correoelectronico,
+        dataemail
+      );
     }
 
     for await (const respuesta of respuestas)
@@ -298,6 +332,8 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
     let array_msn: string[] = [];
     let valido = true;
     let msntemp:string = "";
+    let tienepoliza:boolean = true;
+    let tienevigia:boolean = true;
 
     const output_rues = await this.validarRues(parseInt(nit));
     const output_vigia = await this.validarVigia(nit);
@@ -313,7 +349,8 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
     {
         msntemp = 'La empresa no encuentra registrada en el VIGIA';
         array_msn.push(msntemp);
-        valido = false;
+        valido = true;
+        tienevigia = false;
     }
 
     const output_poliza = await this.validarPoliza(nit);
@@ -322,11 +359,14 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
     {
         msntemp = "La empresa debe reportar las pólizas";
         array_msn.push(msntemp);
+        tienepoliza = false;
     }
 
      return {
          status: valido,
          array_msn:array_msn,
+         tienepoliza:tienepoliza,
+         tienevigia:tienevigia
      }
   }
 
@@ -440,5 +480,15 @@ public async validarRues(nit:number){
             msn: 'Error al crear usuario en polizas'
         };
     }
+  }
+
+  public async enviarCorreo(asunto:string, destinatario:string, data:any){
+    Mail.send(mensaje => {
+      mensaje
+        .subject(asunto)
+        .from(Env.get('SMTP_USERNAME'), Env.get('EMAIL_ALIAS'))
+        .to(destinatario)
+        .htmlView("app/Dominio/Email/Templates/empresas.edge", data)
+    });
   }
 }

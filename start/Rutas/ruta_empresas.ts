@@ -8,3 +8,6 @@ Route.group(() => {
   Route.get('/amparos_poliza', accion_path + '.amparospoliza')
   Route.get('/responsabilidad_poliza', accion_path + '.responsabilidadpoliza')
 }).prefix('api/v1/empresas').middleware('autenticacionJwt')
+
+
+Route.get('/test', accion_path + '.test')
