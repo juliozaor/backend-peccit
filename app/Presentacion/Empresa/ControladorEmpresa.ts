@@ -28,4 +28,9 @@ export default class ControladorEncuesta {
     const array_empresas = await this.service.amparospoliza(request.all())
     return response.status(200).send(array_empresas);
   }
+
+  public async responsabilidadpoliza ({ request, response }:HttpContextContract) {
+    const array_responsabilidad = await this.service.responsabilidadpoliza(request.all())
+    return response.status(200).send(array_responsabilidad);
+  }
 }
