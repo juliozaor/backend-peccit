@@ -350,7 +350,6 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
     {
         msntemp = 'La empresa no encuentra registrada en el VIGIA';
         array_msn.push(msntemp);
-        valido = true;
         tienevigia = false;
     }
 
@@ -435,6 +434,7 @@ public async validarRues(nit:number){
                 document: (nit), // Parámetro del documento en la URL
             }, {
                 headers: {
+                    Authorization: 'Bearer 2c9b417a-75af-46c5-8ca0-340d3acdb3c7', 
                     'Content-Type': 'application/json',
                 }
             });
@@ -462,6 +462,7 @@ public async validarRues(nit:number){
             obj_usuario,
             {
               headers: {
+                  Authorization: 'Bearer 2c9b417a-75af-46c5-8ca0-340d3acdb3c7', 
                   'Content-Type': 'application/json',
               }
             }
