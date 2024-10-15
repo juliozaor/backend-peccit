@@ -14,7 +14,7 @@ export class ServicioEmpresa {
                 const output_poliza = await this.validarPoliza(empresa.emp_nit);
     
                 // Verificar si la póliza es válida o no
-                empresa.poliza = output_poliza.out.code !== "ERR_BAD_REQUEST";
+                empresa.poliza =  (output_poliza.out.polizas.length  > 0);
             }
     
             return array_empresas;
