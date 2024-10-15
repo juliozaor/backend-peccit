@@ -11,10 +11,10 @@ export class ServicioEmpresa {
 
             // Usamos un bucle for...of para iterar sobre las empresas
             for (const empresa of array_empresas) {
-                const output_poliza = await this.validarPoliza(empresa.emp_nit);
+                const output_poliza = await this.validarPoliza(empresa.nit);
     
                 // Verificar si la póliza es válida o no
-                empresa.poliza =  (output_poliza.out.polizas.length  > 0);
+                empresa.poliza =  (output_poliza.out.polizas.length > 0);
             }
     
             return array_empresas;
