@@ -151,6 +151,7 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
           dataemail.usuario = datosEmpresa.nit;
 
           const out_usuario = await this.crearUsuariopolizas(obj_usuario);
+          dataemail.clave = out_usuario.out.clave;
         }
       }
 
