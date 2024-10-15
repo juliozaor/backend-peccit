@@ -27,10 +27,7 @@ export class ServicioEmpresa {
     {
         try
         {
-            const apiResponse = await axios.get(Env.get('URL_POLIZAS')+'/poliza/usuario', {
-                params: {
-                  documento: nit, // Parámetro del documento en la URL
-                },
+            const apiResponse = await axios.get(Env.get('URL_POLIZAS')+'/api/v1/poliza/usuario/'+nit, {
                 headers: {
                   Authorization: 'Bearer 2c9b417a-75af-46c5-8ca0-340d3acdb3c7', // Token Bearer
                   'Content-Type': 'application/json',
