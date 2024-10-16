@@ -19,10 +19,14 @@ export default class ControladorRespuesta {
     const {idReporte} = params
     const payload = await request.obtenerPayloadJWT()
     const respuesta = await this.service.guardar(JSON.stringify(request.all()), idReporte, payload )
-  /*   response.status(200).send({
-      mensaje: "Encuesta guardada correctamente"
-    }) */
+    
     response.status(200).send(respuesta) 
+  }
+
+  public async validacionrvp({ request, response, params }:HttpContextContract) {
+    const {nit} = params;
+    const payload = await request.obtenerPayloadJWT()
+    return this.service.validacionRVP(nit, payload);
   }
 
   public async verificar({ request }:HttpContextContract) {
