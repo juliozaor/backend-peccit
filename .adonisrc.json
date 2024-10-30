@@ -39,6 +39,7 @@
     "./start/Rutas/ruta_formulario",
     "./start/Rutas/ruta_reporta_municipios",
     "./start/Rutas/ruta_meses",
+    "./start/Rutas/ruta_empresas",
     "./start/Rutas/ruta_vigencias",
     "./start/Rutas/ruta_tarifa",
     "./start/Rutas/ruta_informes",
