@@ -85,7 +85,7 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
       }
     }
 
-    await TblEmpresas.query().whereIn('emp_nit', eliminarEmpresas).delete();
+    await TblEmpresas.query().whereIn('emp_nit', eliminarEmpresas).where('emp_usuario_id', documento).delete();
 
     for await (const empresa of guardarEmpresas)
     {
@@ -111,7 +111,9 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
                 municipio: empresa.municipio,
       }
    
-      const isEmpresa = await TblEmpresas.findBy('emp_nit',empresa.nit);
+      const isEmpresa = await TblEmpresas.query()
+      .where('emp_nit', empresa.nit)
+      .where('emp_usuario_id', empresa.emp_usuario_id).first();
       
       const out_validacion =  await this.validacionRVP(empresa.nit);
 
@@ -119,6 +121,7 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
       {
         const affectedRows = await TblEmpresas.query()
         .where('emp_nit', empresa.nit)
+        .where('emp_usuario_id', empresa.emp_usuario_id)
         .update(datosEmpresa);
 
         dataemail.enviarcredenciales = false;
