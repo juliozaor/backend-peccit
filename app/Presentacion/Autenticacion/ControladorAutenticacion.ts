@@ -33,7 +33,7 @@ export default class ControladorArchivoVariable {
     const peticion = request.all()
     const token = peticion['token']
 
-    const respuesta = await axios.post(`${Env.get('URL_VIGIA')}/autenticacion/token/verificar`, {token}).then(resp =>{
+    const respuesta = await axios.post(`${Env.get('URL_SISNT')}/autenticacion/token/verificar`, {token}).then(resp =>{
       return resp.data      
     }).catch(err =>{
       if(err.response?.data){
