@@ -113,7 +113,7 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
    
       const isEmpresa = await TblEmpresas.query()
       .where('emp_nit', empresa.nit)
-      .where('emp_usuario_id', empresa.emp_usuario_id).first();
+      .where('emp_usuario_id', empresa.usuario_id).first();
       
       const out_validacion =  await this.validacionRVP(empresa.nit);
 
@@ -121,7 +121,7 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
       {
         const affectedRows = await TblEmpresas.query()
         .where('emp_nit', empresa.nit)
-        .where('emp_usuario_id', empresa.emp_usuario_id)
+        .where('emp_usuario_id', empresa.usuario_id)
         .update(datosEmpresa);
 
         dataemail.enviarcredenciales = false;
