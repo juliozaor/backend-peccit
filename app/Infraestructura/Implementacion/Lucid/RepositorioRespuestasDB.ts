@@ -136,7 +136,10 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
           dataemail.enviarcredenciales = false;
 
-          if (!out_validacion.tienepoliza)
+          const isEmpresaexite = await TblEmpresas.query()
+          .where('emp_nit', empresa.nit).first();
+
+          if (!isEmpresaexite)
           {
               const obj_usuario = {
                   usuario: "Usuario", // Se autogenera en backend polizas utilizando el nit de la empresa
