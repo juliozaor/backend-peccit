@@ -386,12 +386,13 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
     if (output_poliza.out.data == "")
     {
-        msntemp = "La empresa debe reportar las pólizas";
-        array_msn.push(msntemp);
         tienepoliza = false;
     }
 
-     return {
+    msntemp = "La empresa debe reportar las pólizas";
+    array_msn.push(msntemp);
+
+    return {
          status: valido,
          array_msn:array_msn,
          tienepoliza:tienepoliza,
