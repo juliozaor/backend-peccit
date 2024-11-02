@@ -364,7 +364,7 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
     const output_poliza = await this.validarPoliza(nit);
 
-    if (output_poliza.out)
+    if (output_poliza.out == null)
     {
         msntemp = "La empresa debe reportar las pólizas";
         array_msn.push(msntemp);
