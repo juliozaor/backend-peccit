@@ -376,7 +376,7 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
          array_msn:array_msn,
          tienepoliza:tienepoliza,
          tienevigia:tienevigia,
-         output_poliza: output_poliza
+         output_poliza: output_poliza.out
      }
   }
 
