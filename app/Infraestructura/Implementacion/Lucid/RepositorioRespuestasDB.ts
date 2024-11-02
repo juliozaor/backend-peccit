@@ -364,7 +364,7 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
     const output_poliza = await this.validarPoliza(nit);
 
-    if (output_poliza.out == null)
+    if (output_poliza.out)
     {
         msntemp = "La empresa debe reportar las pólizas";
         array_msn.push(msntemp);
@@ -421,7 +421,7 @@ public async validarPoliza(nit:string){
           });
 
         return {
-            out: apiResponse.data,
+            out: apiResponse,
             status: 200,
             msn: 'Consulta exitosa en Polizas'
         };
