@@ -166,11 +166,6 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
       dataemail.nombre = datosEmpresa.razonSocial;
 
-      if (out_validacion.tienepoliza)
-      {
-          dataemail.textpoliza = '';
-      }
-
       if (out_validacion.tienevigia)
       {
           dataemail.textvigia = '';
