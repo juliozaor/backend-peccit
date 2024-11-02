@@ -375,7 +375,8 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
          status: valido,
          array_msn:array_msn,
          tienepoliza:tienepoliza,
-         tienevigia:tienevigia
+         tienevigia:tienevigia,
+         output_poliza: output_poliza
      }
   }
 
