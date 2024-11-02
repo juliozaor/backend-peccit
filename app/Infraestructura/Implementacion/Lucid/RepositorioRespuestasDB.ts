@@ -136,10 +136,7 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
           dataemail.enviarcredenciales = false;
 
-          const isEmpresaexite = await TblEmpresas.query()
-          .where('emp_nit', empresa.nit).first();
-
-          if (!isEmpresaexite)
+          if (!out_validacion.tienepoliza)
           {
               const obj_usuario = {
                   usuario: "Usuario", // Se autogenera en backend polizas utilizando el nit de la empresa
@@ -367,7 +364,7 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
     const output_poliza = await this.validarPoliza(nit);
 
-    if (output_poliza.out.code == "ERR_BAD_REQUEST")
+    if (output_poliza.out == null)
     {
         msntemp = "La empresa debe reportar las pólizas";
         array_msn.push(msntemp);
@@ -413,9 +410,9 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 public async validarPoliza(nit:string){
     try
     {
-        const apiResponse = await axios.get(Env.get('URL_POLIZAS')+'/poliza/usuario', {
+        const apiResponse = await axios.get(Env.get('URL_POLIZAS')+'/poliza/validar', {
             params: {
-              documento: nit, // Parámetro del documento en la URL
+              usuario: nit, // Parámetro del documento en la URL
             },
             headers: {
               Authorization: 'Bearer 2c9b417a-75af-46c5-8ca0-340d3acdb3c7', // Token Bearer
