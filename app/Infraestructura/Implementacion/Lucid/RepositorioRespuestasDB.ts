@@ -411,7 +411,7 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 public async validarPoliza(nit:string){
     try
     {
-        const apiResponse = await axios.get(Env.get('URL_POLIZAS')+'/api/v1/poliza/validar', {
+        const apiResponse = await axios.get(Env.get('URL_POLIZAS')+'/api/v1/poliza/validar/'+nit, {
             params: {
               usuario: nit, // Parámetro del documento en la URL
             },
