@@ -125,6 +125,31 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
         .update(datosEmpresa);
 
         dataemail.enviarcredenciales = false;
+
+        if (!out_validacion.tienepoliza)
+        {
+            const obj_usuario = {
+                usuario: "Usuario", // Se autogenera en backend polizas utilizando el nit de la empresa
+                identificacion: datosEmpresa.nit,
+                nombre: datosEmpresa.razonSocial,
+                apellido: null,
+                fechaNacimiento: null,
+                cargo: null,
+                correo: datosEmpresa.correoelectronico,
+                telefono: null,
+                estado: true,
+                clave: "Clave", // Se autogenera en backend polizas
+                claveTemporal: true,
+                idRol:'003'
+            };
+
+            dataemail.enviarcredenciales = true;
+            dataemail.clave = datosEmpresa.nit;
+            dataemail.usuario = datosEmpresa.nit;
+
+            const out_usuario = await this.crearUsuariopolizas(obj_usuario);
+            dataemail.clave = out_usuario.out.clave;
+        }
       }
       else
       {
