@@ -85,7 +85,7 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
       }
     }
 
-    await TblEmpresas.query().whereIn('emp_nit', eliminarEmpresas).delete();
+    await TblEmpresas.query().whereIn('emp_nit', eliminarEmpresas).where('emp_usuario_id', documento).delete();
 
     for await (const empresa of guardarEmpresas)
     {
@@ -111,7 +111,9 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
                 municipio: empresa.municipio,
       }
    
-      const isEmpresa = await TblEmpresas.findBy('emp_nit',empresa.nit);
+      const isEmpresa = await TblEmpresas.query()
+      .where('emp_nit', empresa.nit)
+      .where('emp_usuario_id', empresa.usuario_id).first();
       
       const out_validacion =  await this.validacionRVP(empresa.nit);
 
@@ -119,9 +121,35 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
       {
         const affectedRows = await TblEmpresas.query()
         .where('emp_nit', empresa.nit)
+        .where('emp_usuario_id', empresa.usuario_id)
         .update(datosEmpresa);
 
         dataemail.enviarcredenciales = false;
+
+        if (!out_validacion.tienepoliza)
+        {
+            const obj_usuario = {
+                usuario: "Usuario", // Se autogenera en backend polizas utilizando el nit de la empresa
+                identificacion: datosEmpresa.nit,
+                nombre: datosEmpresa.razonSocial,
+                apellido: null,
+                fechaNacimiento: null,
+                cargo: null,
+                correo: datosEmpresa.correoelectronico,
+                telefono: null,
+                estado: true,
+                clave: "Clave", // Se autogenera en backend polizas
+                claveTemporal: true,
+                idRol:'003'
+            };
+
+            dataemail.enviarcredenciales = true;
+            dataemail.clave = datosEmpresa.nit;
+            dataemail.usuario = datosEmpresa.nit;
+
+            const out_usuario = await this.crearUsuariopolizas(obj_usuario);
+            dataemail.clave = out_usuario.out.clave;
+        }
       }
       else
       {
@@ -131,36 +159,37 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
         {
           const a = await TblEmpresas.create(datosEmpresa);
 
-          const obj_usuario = {
-              usuario: "Usuario", // Se autogenera en backend polizas utilizando el nit de la empresa
-              identificacion: datosEmpresa.nit,
-              nombre: datosEmpresa.razonSocial,
-              apellido: null,
-              fechaNacimiento: null,
-              cargo: null,
-              correo: datosEmpresa.correoelectronico,
-              telefono: null,
-              estado: true,
-              clave: "Clave", // Se autogenera en backend polizas
-              claveTemporal: true,
-              idRol:'003'
-          };
+          dataemail.enviarcredenciales = false;
 
-          dataemail.enviarcredenciales = true;
-          dataemail.clave = datosEmpresa.nit;
-          dataemail.usuario = datosEmpresa.nit;
+          if (!out_validacion.tienepoliza)
+          {
+              const obj_usuario = {
+                  usuario: "Usuario", // Se autogenera en backend polizas utilizando el nit de la empresa
+                  identificacion: datosEmpresa.nit,
+                  nombre: datosEmpresa.razonSocial,
+                  apellido: null,
+                  fechaNacimiento: null,
+                  cargo: null,
+                  correo: datosEmpresa.correoelectronico,
+                  telefono: null,
+                  estado: true,
+                  clave: "Clave", // Se autogenera en backend polizas
+                  claveTemporal: true,
+                  idRol:'003'
+              };
 
-          const out_usuario = await this.crearUsuariopolizas(obj_usuario);
-          dataemail.clave = out_usuario.out.clave;
+              dataemail.enviarcredenciales = true;
+              dataemail.clave = datosEmpresa.nit;
+              dataemail.usuario = datosEmpresa.nit;
+
+              const out_usuario = await this.crearUsuariopolizas(obj_usuario);
+              dataemail.clave = out_usuario.out.clave;
+          }
+          
         }
       }
 
       dataemail.nombre = datosEmpresa.razonSocial;
-
-      if (out_validacion.tienepoliza)
-      {
-          dataemail.textpoliza = '';
-      }
 
       if (out_validacion.tienevigia)
       {
@@ -355,18 +384,20 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
     const output_poliza = await this.validarPoliza(nit);
 
-    if (output_poliza.out.code == "ERR_BAD_REQUEST")
+    if (output_poliza.out.data == "")
     {
-        msntemp = "La empresa debe reportar las pólizas";
-        array_msn.push(msntemp);
         tienepoliza = false;
     }
 
-     return {
+    msntemp = "La empresa debe reportar las pólizas";
+    array_msn.push(msntemp);
+
+    return {
          status: valido,
          array_msn:array_msn,
          tienepoliza:tienepoliza,
-         tienevigia:tienevigia
+         tienevigia:tienevigia,
+         output_poliza: output_poliza.out.data
      }
   }
 
@@ -401,9 +432,9 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 public async validarPoliza(nit:string){
     try
     {
-        const apiResponse = await axios.get(Env.get('URL_POLIZAS')+'/poliza/usuario', {
+        const apiResponse = await axios.get(Env.get('URL_POLIZAS')+'/api/v1/poliza/validar/'+nit, {
             params: {
-              documento: nit, // Parámetro del documento en la URL
+              usuario: nit, // Parámetro del documento en la URL
             },
             headers: {
               Authorization: 'Bearer 2c9b417a-75af-46c5-8ca0-340d3acdb3c7', // Token Bearer
@@ -412,7 +443,7 @@ public async validarPoliza(nit:string){
           });
 
         return {
-            out: apiResponse.data,
+            out: apiResponse,
             status: 200,
             msn: 'Consulta exitosa en Polizas'
         };
