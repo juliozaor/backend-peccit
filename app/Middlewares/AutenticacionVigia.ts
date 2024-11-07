@@ -12,6 +12,7 @@ export default class AutenticacionVigia {
     const respuesta = await axios.post(`${Env.get('URL_SISNT')}/autenticacion/token/verificar`, {token}).then(resp =>{
       return resp.data      
     }).catch(err =>{
+      console.log(err);
       if(err.response?.data){
         return err.response.data
       }else{
