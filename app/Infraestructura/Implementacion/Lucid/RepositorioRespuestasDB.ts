@@ -316,23 +316,32 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
         if (respuesta) {
           // console.log(respuesta.cumple , respuesta.corresponde);
           if (!respuesta.cumple || respuesta.cumple == 0 || !respuesta.corresponde || respuesta.corresponde == 0) {
-            faltantes.push(respuesta.idPregunta)
+           // faltantes.push(respuesta.idPregunta)
             aprobado = false
           }
 
 
           if (respuesta.cumple && respuesta.cumple == 2 && (!respuesta.observacionCumple || respuesta.observacionCumple == '')) {
-            faltantes.push(respuesta.idPregunta)
+           // faltantes.push(respuesta.idPregunta)
             aprobado = false
           }
 
           if (respuesta.corresponde && respuesta.corresponde == 2 && (!respuesta.observacionCorresponde || respuesta.observacionCorresponde == '')) {
-            faltantes.push(respuesta.idPregunta)
+           // faltantes.push(respuesta.idPregunta)
             aprobado = false
           }
 
           if (respuesta.corresponde == 2 || respuesta.cumple == 2) {
             cumple = false;
+          }
+
+          if(!aprobado)
+          {
+            faltantes.push(
+              {
+                preguntaId: respuesta.idPregunta,
+                numeroPregunta: preguntaPaso.orden
+            })
           }
 
         }

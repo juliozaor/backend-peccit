@@ -312,6 +312,7 @@ export class RepositorioEncuestasDB implements RepositorioEncuesta {
         aprobado = false
         faltantes.push({
           preguntaId: pregunta.id,
+          numeroPregunta: pregunta.orden
           // archivoObligatorio: pregunta.adjuntableObligatorio
         })
 
