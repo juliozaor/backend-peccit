@@ -139,14 +139,14 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
                 telefono: null,
                 estado: true,
                 clave: "Clave", // Se autogenera en backend polizas
-                claveTemporal: true,
+                claveTemporal: false,
                 idRol:'003'
             };
 
             dataemail.enviarcredenciales = true;
             dataemail.clave = datosEmpresa.nit;
             dataemail.usuario = datosEmpresa.nit;
-
+            this.crearUsuarioSisnt(obj_usuario)
             const out_usuario = await this.crearUsuariopolizas(obj_usuario);
             dataemail.clave = out_usuario.out.clave;
         }
@@ -174,14 +174,14 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
                   telefono: null,
                   estado: true,
                   clave: "Clave", // Se autogenera en backend polizas
-                  claveTemporal: true,
+                  claveTemporal: false,
                   idRol:'003'
               };
 
               dataemail.enviarcredenciales = true;
               dataemail.clave = datosEmpresa.nit;
               dataemail.usuario = datosEmpresa.nit;
-
+              this.crearUsuarioSisnt(obj_usuario)
               const out_usuario = await this.crearUsuariopolizas(obj_usuario);
               dataemail.clave = out_usuario.out.clave;
           }
@@ -196,11 +196,11 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
           dataemail.textvigia = '';
       }
 
-      await this.enviarCorreo(
+      /* await this.enviarCorreo(
         'Registro de empresa exitoso', 
         datosEmpresa.correoelectronico,
         dataemail
-      );
+      ); */
     }
 
     for await (const respuesta of respuestas)
@@ -523,5 +523,40 @@ public async validarRues(nit:number){
         .to(destinatario)
         .htmlView("app/Dominio/Email/Templates/empresas.edge", data)
     });
+  }
+
+  public async crearUsuarioSisnt(obj_usuario:any){
+    
+    try
+    {
+      const data = {
+        nombre: obj_usuario.nombre,
+        identificacion: obj_usuario.identificacion,
+        correo: obj_usuario.correo,
+        idRol: 3,
+        aplicativos:[{
+        "aplicativoId":1,
+        "estado":true
+        }]
+      };
+      
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+          try {
+            await axios.post(`${Env.get('URL_SISNT')}/usuarios/registro-externo`, data, { headers });                
+          } catch (error) {
+            console.log(error);
+            
+          }  
+    } 
+    catch (error)
+    {
+        return {
+            out: null,
+            status: 500,
+            msn: 'Error al crear usuario en sisnt'
+        };
+    }
   }
 }
