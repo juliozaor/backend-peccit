@@ -117,8 +117,12 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
       
       const out_validacion =  await this.validacionRVP(empresa.nit);
 
+      console.log(out_validacion);
+      
+
       if (isEmpresa)
       {
+        console.log('Creando empresa 0');
         const affectedRows = await TblEmpresas.query()
         .where('emp_nit', empresa.nit)
         .where('emp_usuario_id', empresa.usuario_id)
@@ -128,6 +132,7 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
         if (!out_validacion.tienepoliza)
         {
+          console.log('Creando empresa 1');
             const obj_usuario = {
                 usuario: "Usuario", // Se autogenera en backend polizas utilizando el nit de la empresa
                 identificacion: datosEmpresa.nit,
@@ -157,12 +162,14 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
         if (out_validacion.status)
         {
+          console.log('Creando empresa 2');
           const a = await TblEmpresas.create(datosEmpresa);
 
           dataemail.enviarcredenciales = false;
 
           if (!out_validacion.tienepoliza)
           {
+            console.log('Creando empresa 3');
               const obj_usuario = {
                   usuario: "Usuario", // Se autogenera en backend polizas utilizando el nit de la empresa
                   identificacion: datosEmpresa.nit,
