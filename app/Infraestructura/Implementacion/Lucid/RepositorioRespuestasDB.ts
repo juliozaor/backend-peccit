@@ -391,6 +391,9 @@ export class RepositorioRespuestasDB implements RepositorioRespuesta {
 
     const output_poliza = await this.validarPoliza(nit);
 
+    console.log(output_poliza);
+    
+
     if (output_poliza.out.data == "")
     {
         tienepoliza = false;
@@ -448,6 +451,7 @@ public async validarPoliza(nit:string){
               'Content-Type': 'application/json',
             },
           });
+
 
         return {
             out: apiResponse,
